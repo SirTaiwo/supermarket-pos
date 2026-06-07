@@ -1,0 +1,1342 @@
+/* =====================================================
+   Supermarket POS — Stylesheet
+   Phase 1 base styles
+   ===================================================== */
+
+/* ---------- Design tokens ---------- */
+:root {
+    /* Palette */
+    --ink: #1a2238;
+    --ink-soft: #3c4a64;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --bg: #f7f7f5;
+    --paper: #ffffff;
+    --accent: #14532d;
+    --accent-light: #d1fae5;
+    --warning: #b45309;
+    --danger: #991b1b;
+    --danger-light: #fee2e2;
+
+    /* Typography */
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+
+    /* Radii & shadows */
+    --r-sm: 4px;
+    --r-md: 6px;
+    --r-lg: 10px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Make HTML's hidden attribute actually hide elements,
+   even when other CSS sets a display property */
+[hidden] {
+    display: none !important;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+/* ---------- Topbar (signed-in pages) ---------- */
+.topbar {
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-sm);
+}
+
+.topbar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0.85rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+.brand-mark {
+    color: var(--accent);
+    font-size: 1.3rem;
+}
+
+.topnav {
+    flex-grow: 1;
+    display: flex;
+    gap: 0.25rem;
+}
+
+.topnav a {
+    padding: 0.45rem 0.95rem;
+    border-radius: var(--r-sm);
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+}
+
+.topnav a:hover {
+    background: var(--bg);
+    color: var(--ink);
+}
+
+.topnav a.active {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-size: 0.88rem;
+}
+
+.user-name {
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.user-role {
+    color: var(--muted);
+    text-transform: capitalize;
+    font-size: 0.78rem;
+    padding: 0.15rem 0.55rem;
+    background: var(--bg);
+    border-radius: 100px;
+}
+
+.logout-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.logout-link:hover {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+}
+
+/* ---------- Page container ---------- */
+.page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    min-height: calc(100vh - 140px);
+}
+
+.sitefoot {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 0.82rem;
+    border-top: 1px solid var(--line);
+    margin-top: 2rem;
+}
+
+/* ---------- Flash messages ---------- */
+.flash {
+    padding: 0.85rem 1.5rem;
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.9rem;
+    border-bottom: 1px solid;
+}
+
+.flash-success {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.flash-error {
+    background: var(--danger-light);
+    color: var(--danger);
+    border-bottom-color: var(--danger);
+}
+
+.flash.inline {
+    border-radius: var(--r-md);
+    border: 1px solid;
+    margin-bottom: 1rem;
+}
+
+/* ---------- Buttons ---------- */
+.btn-primary,
+.btn-secondary {
+    display: inline-block;
+    padding: 0.7rem 1.5rem;
+    border-radius: var(--r-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0f3d22;
+}
+
+.btn-secondary {
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--line);
+}
+
+.btn-secondary:hover {
+    background: var(--bg);
+    border-color: var(--ink-soft);
+}
+
+/* ---------- Login page ---------- */
+.login-body {
+    background: linear-gradient(180deg, #f7f7f5 0%, #ebebe6 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.login-wrap {
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-card {
+    background: var(--paper);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 2.5rem 2rem;
+}
+
+.login-brand {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.brand-mark-large {
+    font-size: 2.5rem;
+    color: var(--accent);
+    margin-bottom: 0.25rem;
+}
+
+.login-brand h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.5rem;
+    color: var(--ink);
+}
+
+.login-brand p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.field-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+}
+
+.field input {
+    padding: 0.75rem 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.login-form .btn-primary {
+    margin-top: 0.5rem;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+}
+
+.login-help {
+    background: var(--bg);
+    padding: 1rem 1.25rem;
+    border-radius: var(--r-md);
+    border: 1px solid var(--line);
+}
+
+.help-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.login-help ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+}
+
+.login-help li {
+    margin-bottom: 0.2rem;
+}
+
+.login-foot {
+    text-align: center;
+    margin-top: 1.25rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+/* ---------- Error page ---------- */
+.error-body {
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.error-card {
+    background: var(--paper);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-md);
+    padding: 3rem 2rem;
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+}
+
+.error-mark {
+    width: 64px;
+    height: 64px;
+    line-height: 64px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    background: var(--danger-light);
+    color: var(--danger);
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.error-card h1 {
+    margin: 0 0 0.5rem;
+    color: var(--ink);
+}
+
+.error-card p {
+    margin: 0 0 1.5rem;
+    color: var(--muted);
+}
+
+/* =====================================================
+   TILL SCREEN (POS)
+   ===================================================== */
+
+.pos-body {
+    background: var(--bg);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------- Top bar ---------- */
+.pos-topbar {
+    background: var(--ink);
+    color: white;
+    padding: 0.85rem 1.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+}
+
+.pos-topbar-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.pos-topbar .brand {
+    color: white;
+    font-size: 1.1rem;
+}
+
+.pos-topbar .brand-mark {
+    color: #5dd4a0;
+}
+
+.pos-clock {
+    flex-grow: 1;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    color: #5dd4a0;
+}
+
+.pos-cashier {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-size: 0.9rem;
+}
+
+.cashier-label {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.cashier-name {
+    font-weight: 500;
+}
+
+.pos-topbar .logout-link {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.85rem;
+}
+
+.pos-topbar .logout-link:hover {
+    color: white;
+    border-bottom-color: white;
+}
+
+/* ---------- Main layout: 2-column ---------- */
+.pos-main {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 0;
+    overflow: hidden;
+}
+
+/* ---------- LEFT: Products ---------- */
+.pos-products {
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: var(--bg);
+}
+
+.pos-search {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--paper);
+    padding: 1rem;
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.25rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.pos-search input {
+    flex-grow: 1;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.pos-search input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.search-count {
+    color: var(--muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.pos-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.85rem;
+}
+
+.product-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: left;
+    font-family: inherit;
+}
+
+.product-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.product-card:active {
+    transform: translateY(0);
+}
+
+.product-card .pc-name {
+    font-weight: 500;
+    font-size: 0.92rem;
+    color: var(--ink);
+    line-height: 1.3;
+    min-height: 2.4em;
+}
+
+.product-card .pc-price {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.product-card .pc-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+.product-card .pc-stock-low {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+.product-card .pc-vat {
+    background: var(--bg);
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    font-size: 0.7rem;
+}
+
+.product-card[data-out-of-stock="true"] {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.pos-empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 3rem 1rem;
+}
+
+/* ---------- RIGHT: Cart panel ---------- */
+.pos-cart {
+    background: var(--paper);
+    border-left: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.cart-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--ink);
+}
+
+.cart-clear {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: inherit;
+}
+
+.cart-clear:hover {
+    color: var(--danger);
+}
+
+.cart-items {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0.75rem 1rem;
+}
+
+.cart-empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 2rem 1rem;
+}
+
+.cart-hint {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.cart-line {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+    padding: 0.85rem 0.5rem;
+    border-bottom: 1px solid var(--bg);
+}
+
+.cart-line:last-child {
+    border-bottom: none;
+}
+
+.cart-line-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.cart-line-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+}
+
+.cart-line-total {
+    font-weight: 600;
+    color: var(--ink);
+    text-align: right;
+}
+
+.cart-line-controls {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+}
+
+.qty-btn {
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--ink);
+}
+
+.qty-btn:hover {
+    background: var(--bg);
+}
+
+.qty-value {
+    min-width: 30px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.cart-line-remove {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 0.78rem;
+    text-decoration: underline;
+    font-family: inherit;
+}
+
+/* ---------- Cart totals ---------- */
+.cart-totals {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+}
+
+.totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+}
+
+.totals-grand {
+    margin-top: 0.5rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--line);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.totals-meta {
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+/* ---------- Cart actions ---------- */
+.cart-actions {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.payment-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.payment-select select {
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-size: 0.92rem;
+    font-family: inherit;
+    background: var(--paper);
+    cursor: pointer;
+}
+
+.btn-complete {
+    padding: 1rem;
+    font-size: 1.05rem;
+}
+
+.btn-complete:disabled {
+    background: var(--line);
+    color: var(--muted);
+    cursor: not-allowed;
+}
+
+/* ---------- Receipt modal ---------- */
+.receipt-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 34, 56, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1.5rem;
+}
+
+.receipt-card {
+    background: var(--paper);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.receipt-header {
+    padding: 2rem 2rem 1rem;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+}
+
+.receipt-tick {
+    width: 56px;
+    height: 56px;
+    line-height: 56px;
+    margin: 0 auto 0.75rem;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.receipt-header h2 {
+    margin: 0 0 0.25rem;
+    color: var(--ink);
+}
+
+.receipt-ref {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+}
+
+.receipt-body {
+    padding: 1.5rem 2rem;
+}
+
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 0.88rem;
+}
+
+.receipt-table td {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--line);
+}
+
+.receipt-table td:last-child {
+    text-align: right;
+    font-weight: 500;
+}
+
+.receipt-totals {
+    border-top: 2px solid var(--ink);
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.receipt-meta {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    display: grid;
+    gap: 0.3rem;
+}
+
+.receipt-actions {
+    padding: 1.25rem 2rem 2rem;
+    text-align: center;
+}
+
+.receipt-actions .btn-primary {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+}
+/* =====================================================
+   PRODUCTS PAGE — Table and form styles
+   ===================================================== */
+
+/* ---------- Page header (heading + action button) ---------- */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.page-header h1 {
+    margin: 0 0 0.4rem;
+    font-size: 1.85rem;
+    color: var(--ink);
+}
+
+.page-subtitle {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+/* ---------- Data table ---------- */
+.table-wrap {
+    background: var(--paper);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+
+.data-table thead th {
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-weight: 600;
+    text-align: left;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+}
+
+.data-table th.num,
+.data-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.data-table th.actions-col,
+.data-table td.actions-col {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.data-table tbody td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--bg);
+    vertical-align: top;
+}
+
+.data-table tbody tr:hover {
+    background: rgba(20, 83, 45, 0.02);
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tbody tr.row-inactive {
+    opacity: 0.55;
+}
+
+.cell-name {
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.cell-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
+    font-family: var(--font-mono);
+}
+
+.data-table .mono {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+}
+
+.stock-low {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+/* ---------- VAT pills (STD / ZERO / EXEMPT) ---------- */
+.vat-pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.vat-std {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.vat-zero {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.vat-exempt {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+/* ---------- Status pills (Active / Inactive) ---------- */
+.status-pill {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.status-inactive {
+    background: var(--line);
+    color: var(--muted);
+}
+
+/* ---------- Tiny buttons (table actions) ---------- */
+.btn-tiny {
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    border-radius: var(--r-sm);
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    cursor: pointer;
+    text-decoration: none;
+    font-family: inherit;
+    margin-left: 0.25rem;
+    transition: all 0.15s;
+}
+
+.btn-tiny:hover {
+    background: var(--bg);
+    border-color: var(--ink-soft);
+    color: var(--ink);
+}
+
+.btn-tiny-danger:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+/* ---------- Empty state ---------- */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--paper);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.empty-state p {
+    color: var(--muted);
+    margin: 0 0 1.5rem;
+    font-size: 1.05rem;
+}
+
+/* =====================================================
+   PRODUCT FORM PAGE
+   ===================================================== */
+
+.form-page {
+    max-width: 720px;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.form-header h1 {
+    margin: 0;
+    font-size: 1.7rem;
+    color: var(--ink);
+}
+
+.form-back {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.92rem;
+}
+
+.form-back:hover {
+    color: var(--ink);
+}
+
+.product-form {
+    background: var(--paper);
+    border-radius: var(--r-md);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.field-full {
+    grid-column: 1 / -1;
+}
+
+.field input,
+.field select,
+.field textarea {
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+}
+
+.field textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.field-hint {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+}
+
+.req {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+}
+
+@media (max-width: 640px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* =====================================================
+   REPORTS PAGE
+   ===================================================== */
+
+/* ---------- Date picker (in page header) ---------- */
+.date-picker {
+    display: flex;
+    align-items: end;
+    gap: 0.75rem;
+}
+
+.date-picker .field-label {
+    display: none;   /* visible label not needed for this control */
+}
+
+.date-picker input[type="date"] {
+    padding: 0.55rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-family: inherit;
+    font-size: 0.92rem;
+    background: var(--paper);
+    color: var(--ink);
+}
+
+/* ---------- Headline stat cards ---------- */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+}
+
+.stat-card {
+    background: var(--paper);
+    border-radius: var(--r-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.stat-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+@media (max-width: 1100px) {
+    .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Two-column area (VAT breakdown + Top sellers) ---------- */
+.report-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.report-card {
+    background: var(--paper);
+    border-radius: var(--r-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.report-card h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.15rem;
+    color: var(--ink);
+}
+
+.report-card-sub {
+    margin: 0 0 1.25rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.report-table {
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.report-table thead th {
+    background: var(--bg);
+    padding: 0.6rem 0.85rem;
+    font-size: 0.78rem;
+}
+
+.report-table tbody td {
+    padding: 0.7rem 0.85rem;
+}
+
+@media (max-width: 960px) {
+    .report-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Transactions section ---------- */
+.report-section {
+    margin-bottom: 2rem;
+}
+
+.report-section h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.15rem;
+    color: var(--ink);
+}
+
+/* ---------- Payment pills ---------- */
+.pay-pill {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.pay-cash {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.pay-card {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.pay-mobile {
+    background: #fce7f3;
+    color: #9d174d;
+}

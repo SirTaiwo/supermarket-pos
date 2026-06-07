@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/reports/daily" class="active">Reports</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Page ========== -->
+    <main class="page">
+
+        <!-- Header with date picker -->
+        <div class="page-header">
+            <div>
+                <h1>Daily report</h1>
+                <p class="page-subtitle">
+                    <%= isToday ? 'Today' : 'Sales for' %> &middot; <%= reportDate %>
+                </p>
+            </div>
+            <form method="GET" action="/reports/daily" class="date-picker">
+                <label class="field-label">Choose date</label>
+                <input type="date" name="date" value="<%= reportDate %>" />
+                <button type="submit" class="btn-secondary">View</button>
+            </form>
+        </div>
+
+        <!-- ====== Headline numbers ====== -->
+        <section class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total takings</span>
+                <span class="stat-value"><%= headline.total_display %></span>
+                <span class="stat-sub">VAT included</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">VAT collected</span>
+                <span class="stat-value"><%= headline.vat_display %></span>
+                <span class="stat-sub">Output VAT for SARS</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Transactions</span>
+                <span class="stat-value"><%= headline.transaction_count %></span>
+                <span class="stat-sub">Completed sales</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Items sold</span>
+                <span class="stat-value"><%= headline.items_sold %></span>
+                <span class="stat-sub">Units across all lines</span>
+            </div>
+        </section>
+
+
+        <% if (headline.transaction_count === 0) { %>
+
+            <div class="empty-state">
+                <p>No sales recorded for <%= reportDate %>.</p>
+                <a href="/pos" class="btn-primary">Open the till</a>
+            </div>
+
+        <% } else { %>
+
+            <!-- ====== Two-column area ====== -->
+            <section class="report-grid">
+
+                <!-- VAT breakdown -->
+                <div class="report-card">
+                    <h2>VAT breakdown</h2>
+                    <p class="report-card-sub">By VAT category &mdash; the basis for SARS submission</p>
+
+                    <table class="data-table report-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th class="num">Lines</th>
+                                <th class="num">Net</th>
+                                <th class="num">VAT</th>
+                                <th class="num">Gross</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% vatBreakdown.forEach(row => { %>
+                                <tr>
+                                    <td><%= row.category %></td>
+                                    <td class="num"><%= row.line_count %></td>
+                                    <td class="num"><%= row.net_display %></td>
+                                    <td class="num"><%= row.vat_display %></td>
+                                    <td class="num"><strong><%= row.gross_display %></strong></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Top sellers -->
+                <div class="report-card">
+                    <h2>Top sellers</h2>
+                    <p class="report-card-sub">Highest unit movement today</p>
+
+                    <table class="data-table report-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="num">Units</th>
+                                <th class="num">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% topSellers.forEach(row => { %>
+                                <tr>
+                                    <td>
+                                        <div class="cell-name"><%= row.product_name %></div>
+                                        <div class="cell-meta"><%= row.product_sku %></div>
+                                    </td>
+                                    <td class="num"><%= row.units_sold %></td>
+                                    <td class="num"><%= row.revenue_display %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+
+
+            <!-- ====== Transactions list ====== -->
+            <section class="report-section">
+                <h2>Transactions</h2>
+                <p class="report-card-sub">All completed sales for this day, most recent first</p>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Time</th>
+                                <th>Cashier</th>
+                                <th class="num">Items</th>
+                                <th class="num">VAT</th>
+                                <th class="num">Total</th>
+                                <th>Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% transactions.forEach(tx => { %>
+                                <tr>
+                                    <td class="mono"><%= tx.reference %></td>
+                                    <td><%= tx.time %></td>
+                                    <td><%= tx.cashier_name %></td>
+                                    <td class="num"><%= tx.units %></td>
+                                    <td class="num"><%= tx.vat_display %></td>
+                                    <td class="num"><strong><%= tx.total_display %></strong></td>
+                                    <td>
+                                        <span class="pay-pill pay-<%= tx.payment_method %>">
+                                            <%= tx.payment_method %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        <% } %>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 1 prototype</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

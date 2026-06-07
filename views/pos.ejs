@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="pos-body">
+
+    <!-- ========================= TOP BAR ========================= -->
+    <header class="pos-topbar">
+        <div class="pos-topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+
+            <div class="pos-clock" id="posClock">--:--</div>
+
+            <div class="pos-cashier">
+                <span class="cashier-label">Cashier</span>
+                <span class="cashier-name"><%= currentUser.full_name %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================= MAIN TILL ========================= -->
+    <main class="pos-main">
+
+        <!-- ----- LEFT: Product grid ----- -->
+        <section class="pos-products">
+
+            <div class="pos-search">
+                <input
+                    type="search"
+                    id="posSearch"
+                    placeholder="Search by product name, SKU, or barcode..."
+                    autofocus
+                    autocomplete="off"
+                />
+                <span class="search-count" id="searchCount">Loading...</span>
+            </div>
+
+            <div class="pos-product-grid" id="productGrid">
+                <!-- Populated by pos-client.js -->
+            </div>
+
+            <div class="pos-empty" id="posEmpty" hidden>
+                <p>No products match your search.</p>
+            </div>
+
+        </section>
+
+
+        <!-- ----- RIGHT: Cart panel ----- -->
+        <aside class="pos-cart">
+
+            <div class="cart-header">
+                <h2>Current sale</h2>
+                <button type="button" class="cart-clear" id="cartClear" hidden>Clear</button>
+            </div>
+
+            <div class="cart-items" id="cartItems">
+                <div class="cart-empty" id="cartEmpty">
+                    <p>No items yet.</p>
+                    <p class="cart-hint">Click a product to add it.</p>
+                </div>
+            </div>
+
+            <div class="cart-totals" id="cartTotals" hidden>
+                <div class="totals-row">
+                    <span>Subtotal (excl. VAT)</span>
+                    <span id="totalSubtotal">R 0.00</span>
+                </div>
+                <div class="totals-row">
+                    <span>VAT</span>
+                    <span id="totalVat">R 0.00</span>
+                </div>
+                <div class="totals-row totals-grand">
+                    <span>Total</span>
+                    <span id="totalGrand">R 0.00</span>
+                </div>
+            </div>
+
+            <div class="cart-actions">
+                <label class="payment-select">
+                    <span class="field-label">Payment</span>
+                    <select id="paymentMethod">
+                        <option value="cash">Cash</option>
+                        <option value="card">Card</option>
+                        <option value="mobile">Mobile</option>
+                    </select>
+                </label>
+
+                <button type="button" class="btn-primary btn-complete" id="completeSale" disabled>
+                    Complete sale
+                </button>
+            </div>
+
+        </aside>
+
+    </main>
+
+
+    <!-- ========================= RECEIPT MODAL ========================= -->
+    <div class="receipt-overlay" id="receiptOverlay" hidden>
+        <div class="receipt-card">
+
+            <div class="receipt-header">
+                <div class="receipt-tick">✓</div>
+                <h2>Sale complete</h2>
+                <p class="receipt-ref" id="receiptRef">SAL-...</p>
+            </div>
+
+            <div class="receipt-body">
+
+                <table class="receipt-table" id="receiptTable">
+                    <!-- Populated by pos-client.js -->
+                </table>
+
+                <div class="receipt-totals">
+                    <div class="totals-row">
+                        <span>Subtotal</span>
+                        <span id="rcpSubtotal">R 0.00</span>
+                    </div>
+                    <div class="totals-row">
+                        <span>VAT</span>
+                        <span id="rcpVat">R 0.00</span>
+                    </div>
+                    <div class="totals-row totals-grand">
+                        <span>Total paid</span>
+                        <span id="rcpTotal">R 0.00</span>
+                    </div>
+                    <div class="totals-row totals-meta">
+                        <span>Payment</span>
+                        <span id="rcpPayment">Cash</span>
+                    </div>
+                </div>
+
+                <div class="receipt-meta">
+                    <div><strong>Cashier:</strong> <span id="rcpCashier"></span></div>
+                    <div><strong>Time:</strong> <span id="rcpTime"></span></div>
+                </div>
+
+            </div>
+
+            <div class="receipt-actions">
+                <button type="button" class="btn-primary" id="receiptClose">Start new sale</button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script src="/js/pos-client.js"></script>
+
+</body>
+</html>

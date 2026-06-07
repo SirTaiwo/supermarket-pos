@@ -1,0 +1,70 @@
+<%
+    // Standalone page — no layout include. Login is intentionally
+    // outside the main app shell since there's no nav before sign-in.
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="login-body">
+
+    <div class="login-wrap">
+
+        <div class="login-card">
+
+            <div class="login-brand">
+                <div class="brand-mark-large">▤</div>
+                <h1>Supermarket POS</h1>
+                <p>Phase 1 prototype</p>
+            </div>
+
+            <% if (flashError && flashError.length > 0) { %>
+                <div class="flash flash-error inline"><%= flashError[0] %></div>
+            <% } %>
+
+            <form method="POST" action="/login" class="login-form">
+
+                <label class="field">
+                    <span class="field-label">Username</span>
+                    <input
+                        type="text"
+                        name="username"
+                        autocomplete="username"
+                        autofocus
+                        required
+                    />
+                </label>
+
+                <label class="field">
+                    <span class="field-label">Password</span>
+                    <input
+                        type="password"
+                        name="password"
+                        autocomplete="current-password"
+                        required
+                    />
+                </label>
+
+                <button type="submit" class="btn-primary">Sign in</button>
+
+            </form>
+
+            <div class="login-help">
+                <p class="help-title">Demo credentials</p>
+                <ul>
+                    <li><strong>Manager:</strong> manager / demo1234</li>
+                    <li><strong>Cashier:</strong> cashier / demo1234</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <p class="login-foot">Supermarket POS &middot; Built as a portfolio prototype</p>
+
+    </div>
+
+</body>
+</html>

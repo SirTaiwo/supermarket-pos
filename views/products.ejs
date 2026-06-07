@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products" class="active">Products</a>
+                <a href="/reports/daily">Reports</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash messages ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="page-header">
+            <div>
+                <h1>Products</h1>
+                <p class="page-subtitle">
+                    <%= products.length %> product<%= products.length === 1 ? '' : 's' %> in the catalogue
+                </p>
+            </div>
+            <a href="/products/new" class="btn-primary">+ Add product</a>
+        </div>
+
+        <% if (products.length === 0) { %>
+            <div class="empty-state">
+                <p>No products yet.</p>
+                <a href="/products/new" class="btn-primary">Add your first product</a>
+            </div>
+        <% } else { %>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Name</th>
+                            <th>VAT</th>
+                            <th class="num">Price</th>
+                            <th class="num">Stock</th>
+                            <th>Status</th>
+                            <th class="actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% products.forEach(p => { %>
+                            <tr class="<%= p.is_active ? '' : 'row-inactive' %>">
+                                <td class="mono"><%= p.sku %></td>
+                                <td>
+                                    <div class="cell-name"><%= p.name %></div>
+                                    <% if (p.barcode) { %>
+                                        <div class="cell-meta"><%= p.barcode %></div>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <span class="vat-pill vat-<%= p.vat_code.toLowerCase() %>">
+                                        <%= p.vat_code %>
+                                    </span>
+                                </td>
+                                <td class="num"><%= p.price_display %></td>
+                                <td class="num <%= p.stock_low ? 'stock-low' : '' %>">
+                                    <%= p.stock_qty %>
+                                </td>
+                                <td>
+                                    <% if (p.is_active) { %>
+                                        <span class="status-pill status-active">Active</span>
+                                    <% } else { %>
+                                        <span class="status-pill status-inactive">Inactive</span>
+                                    <% } %>
+                                </td>
+                                <td class="actions-col">
+                                    <a href="/products/<%= p.id %>/edit" class="btn-tiny">Edit</a>
+                                    <form method="POST" action="/products/<%= p.id %>/toggle" style="display:inline;"
+      onsubmit="return confirm(this.dataset.confirm)"
+      data-confirm="<%= p.is_active ? 'Deactivate' : 'Reactivate' %> this product?">
+    <button type="submit" class="btn-tiny btn-tiny-danger">
+        <%= p.is_active ? 'Deactivate' : 'Reactivate' %>
+    </button>
+</form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+        <% } %>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 1 prototype</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

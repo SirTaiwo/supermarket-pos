@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="<%= bodyClass || '' %>">
+
+    <% if (currentUser) { %>
+        <header class="topbar">
+            <div class="topbar-inner">
+                <a href="/" class="brand">
+                    <span class="brand-mark">▤</span>
+                    <span class="brand-name">Supermarket POS</span>
+                </a>
+
+                <nav class="topnav">
+                    <% if (currentUser.role === 'cashier' || currentUser.role === 'manager') { %>
+                        <a href="/pos" class="<%= active === 'pos' ? 'active' : '' %>">Till</a>
+                    <% } %>
+                    <% if (currentUser.role === 'manager') { %>
+                        <a href="/products" class="<%= active === 'products' ? 'active' : '' %>">Products</a>
+                        <a href="/reports/daily" class="<%= active === 'reports' ? 'active' : '' %>">Reports</a>
+                    <% } %>
+                </nav>
+
+                <div class="topbar-user">
+                    <span class="user-name"><%= currentUser.full_name %></span>
+                    <span class="user-role"><%= currentUser.role %></span>
+                    <a href="/logout" class="logout-link">Sign out</a>
+                </div>
+            </div>
+        </header>
+    <% } %>
+
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <main class="page">
+        <%- body %>
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 1 prototype</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

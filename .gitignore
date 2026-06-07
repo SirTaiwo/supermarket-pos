@@ -1,0 +1,27 @@
+# ----- Node ---------------------------------------------
+node_modules/
+npm-debug.log*
+
+# ----- Environment & secrets ----------------------------
+.env
+.env.local
+
+# ----- SQLite database (data, not code) -----------------
+data/pos.db
+data/pos.db-journal
+data/pos.db-wal
+data/pos.db-shm
+
+# ----- OS clutter ---------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- Editor clutter -----------------------------------
+.vscode/
+.idea/
+*.swp
+
+# ----- Logs ---------------------------------------------
+logs/
+*.log

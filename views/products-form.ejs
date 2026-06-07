@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products" class="active">Products</a>
+                <a href="/reports/daily">Reports</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash messages ========== -->
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Form ========== -->
+    <main class="page">
+
+        <div class="form-page">
+
+            <div class="form-header">
+                <h1><%= formTitle %></h1>
+                <a href="/products" class="form-back">← Back to products</a>
+            </div>
+
+            <form method="POST" action="<%= formAction %>" class="product-form">
+
+                <div class="form-grid">
+
+                    <!-- SKU -->
+                    <label class="field">
+                        <span class="field-label">SKU <span class="req">*</span></span>
+                        <input
+                            type="text"
+                            name="sku"
+                            value="<%= product ? product.sku : '' %>"
+                            required
+                            placeholder="e.g. ST-BV-001"
+                        />
+                        <span class="field-hint">Unique stock-keeping unit code</span>
+                    </label>
+
+                    <!-- Barcode -->
+                    <label class="field">
+                        <span class="field-label">Barcode</span>
+                        <input
+                            type="text"
+                            name="barcode"
+                            value="<%= product && product.barcode ? product.barcode : '' %>"
+                            placeholder="e.g. 6001120100021"
+                        />
+                        <span class="field-hint">Optional, must be unique</span>
+                    </label>
+
+                    <!-- Name (full width) -->
+                    <label class="field field-full">
+                        <span class="field-label">Product name <span class="req">*</span></span>
+                        <input
+                            type="text"
+                            name="name"
+                            value="<%= product ? product.name : '' %>"
+                            required
+                            placeholder="e.g. Iwisa Super Maize Meal 5kg"
+                        />
+                    </label>
+
+                    <!-- Description (full width) -->
+                    <label class="field field-full">
+                        <span class="field-label">Description</span>
+                        <textarea
+                            name="description"
+                            rows="2"
+                            placeholder="Optional notes about the product"
+                        ><%= product && product.description ? product.description : '' %></textarea>
+                    </label>
+
+                    <!-- Price -->
+                    <label class="field">
+                        <span class="field-label">Selling price (R) <span class="req">*</span></span>
+                        <input
+                            type="number"
+                            name="price_rands"
+                            step="0.01"
+                            min="0"
+                            value="<%= product ? (product.price_cents / 100).toFixed(2) : '' %>"
+                            required
+                            placeholder="119.99"
+                        />
+                        <span class="field-hint">VAT-inclusive shelf price</span>
+                    </label>
+
+                    <!-- Cost -->
+                    <label class="field">
+                        <span class="field-label">Cost price (R)</span>
+                        <input
+                            type="number"
+                            name="cost_rands"
+                            step="0.01"
+                            min="0"
+                            value="<%= product && product.cost_cents ? (product.cost_cents / 100).toFixed(2) : '' %>"
+                            placeholder="90.00"
+                        />
+                        <span class="field-hint">Optional, for margin reports</span>
+                    </label>
+
+                    <!-- VAT category -->
+                    <label class="field">
+                        <span class="field-label">VAT category <span class="req">*</span></span>
+                        <select name="vat_category_id" required>
+                            <option value="">-- Choose --</option>
+                            <% vatCategories.forEach(v => { %>
+                                <option
+                                    value="<%= v.id %>"
+                                    <%= product && product.vat_category_id === v.id ? 'selected' : '' %>
+                                >
+                                    <%= v.code %> &mdash; <%= v.name %> (<%= v.rate_percent %>%)
+                                </option>
+                            <% }) %>
+                        </select>
+                    </label>
+
+                    <!-- Stock -->
+                    <label class="field">
+                        <span class="field-label">Stock quantity</span>
+                        <input
+                            type="number"
+                            name="stock_qty"
+                            min="0"
+                            value="<%= product ? product.stock_qty : 0 %>"
+                            placeholder="0"
+                        />
+                        <span class="field-hint">Current units in stock</span>
+                    </label>
+
+                </div>
+
+                <div class="form-actions">
+                    <a href="/products" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary"><%= submitLabel %></button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 1 prototype</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>
