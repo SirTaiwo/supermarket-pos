@@ -132,6 +132,42 @@ function generateSaleReference() {
     return `SAL-${yyyy}${mm}${dd}-${hh}${mi}${ss}-${random}`;
 }
 
+// =====================================================
+// generateGrnReference
+// =====================================================
+// Produces references like GRN-20260608-001
+// Sequential within the day. Looks up the highest
+// existing reference for today and increments.
+// =====================================================
+function generateGrnReference(db) {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const datePart = `${yyyy}${mm}${dd}`;
+    const prefix = `GRN-${datePart}-`;
+
+    // Find the highest existing reference for today
+    const row = db.prepare(`
+        SELECT reference
+        FROM goods_received_notes
+        WHERE reference LIKE ?
+        ORDER BY reference DESC
+        LIMIT 1
+    `).get(prefix + "%");
+
+    let nextNumber = 1;
+    if (row) {
+        // Extract the sequence number from the existing reference
+        const parts = row.reference.split("-");
+        const lastNum = parseInt(parts[parts.length - 1], 10);
+        nextNumber = lastNum + 1;
+    }
+
+    const seq = String(nextNumber).padStart(3, "0");
+    return `${prefix}${seq}`;
+}
+
 
 // -----------------------------------------------------
 // Export everything
@@ -142,4 +178,5 @@ module.exports = {
     formatDateOnly,
     calculateLineVat,
     generateSaleReference,
+    generateGrnReference,
 };

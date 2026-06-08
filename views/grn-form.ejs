@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn" class="active">Goods received</a>
+                <a href="/reports/daily">Reports</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="grn-form-page">
+
+            <div class="form-header">
+                <h1>Record new delivery</h1>
+                <a href="/grn" class="form-back">← Back to deliveries</a>
+            </div>
+
+            <form method="POST" action="/grn" id="grn-form" class="grn-form">
+
+                <!-- ===== Header inputs ===== -->
+                <div class="grn-header-grid">
+
+                    <label class="field">
+                        <span class="field-label">Supplier <span class="req">*</span></span>
+                        <select name="supplier_id" id="supplier-select" required>
+                            <option value="">-- Select supplier --</option>
+                            <% suppliers.forEach(s => { %>
+                                <option value="<%= s.id %>" data-terms="<%= s.payment_terms || '' %>">
+                                    <%= s.name %><% if (s.payment_terms) { %> (<%= s.payment_terms %>)<% } %>
+                                </option>
+                            <% }) %>
+                        </select>
+                        <% if (suppliers.length === 0) { %>
+                            <span class="field-hint" style="color: #c00;">
+                                No active suppliers. <a href="/suppliers/new">Add one first</a>.
+                            </span>
+                        <% } %>
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">Supplier's invoice number</span>
+                        <input
+                            type="text"
+                            name="supplier_invoice"
+                            placeholder="e.g. INV-2026-04221"
+                        />
+                        <span class="field-hint">From the delivery paperwork</span>
+                    </label>
+
+                    <label class="field field-full">
+                        <span class="field-label">Notes</span>
+                        <textarea
+                            name="notes"
+                            rows="2"
+                            placeholder="e.g. Two cartons damaged on arrival, supplier credit pending"
+                        ></textarea>
+                    </label>
+
+                </div>
+
+                <!-- ===== Line items section ===== -->
+                <div class="grn-lines-section">
+
+                    <h2 class="section-heading">Line items</h2>
+
+                    <!-- Product search -->
+                    <div class="grn-product-search">
+                        <input
+                            type="text"
+                            id="product-search"
+                            placeholder="Search products by name or SKU..."
+                            autocomplete="off"
+                        />
+                        <div id="search-results" class="search-results" hidden></div>
+                    </div>
+
+                    <!-- Lines table -->
+                    <div class="grn-lines-wrap">
+                        <table class="grn-lines-table" id="lines-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-product">Product</th>
+                                    <th class="col-qty num">Qty</th>
+                                    <th class="col-cost num">Unit cost (R, excl VAT)</th>
+                                    <th class="col-vat num">VAT</th>
+                                    <th class="col-total num">Line total</th>
+                                    <th class="col-remove"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="lines-tbody">
+                                <tr id="empty-row">
+                                    <td colspan="6" class="empty-cell">
+                                        Search for a product above to add a line.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <!-- ===== Totals section ===== -->
+                <div class="grn-totals">
+                    <div class="totals-row">
+                        <span class="totals-label">Subtotal (excl VAT)</span>
+                        <span class="totals-value" id="total-subtotal">R 0.00</span>
+                    </div>
+                    <div class="totals-row">
+                        <span class="totals-label">VAT</span>
+                        <span class="totals-value" id="total-vat">R 0.00</span>
+                    </div>
+                    <div class="totals-row totals-row-grand">
+                        <span class="totals-label">Total payable</span>
+                        <span class="totals-value" id="total-grand">R 0.00</span>
+                    </div>
+                </div>
+
+                <!-- ===== Hidden field carries the lines JSON ===== -->
+                <input type="hidden" name="lines" id="lines-json" value="[]" />
+
+                <!-- ===== Form actions ===== -->
+                <div class="form-actions">
+                    <a href="/grn" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary" id="post-grn-btn" disabled>
+                        Post delivery
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 2</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+
+    <!-- ===== Inline JavaScript ===== -->
+    <script>
+        (function() {
+            "use strict";
+
+            // ----- Product catalog (sent by server) -----
+            const products = <%- JSON.stringify(products) %>;
+
+            // Index by ID for fast lookup
+            const productsById = new Map();
+            products.forEach(p => productsById.set(p.id, p));
+
+            // ----- State: the lines currently in the form -----
+            // Each line: { product_id, quantity, unit_cost_cents }
+            const lines = [];
+
+
+            // ----- DOM references -----
+            const searchInput     = document.getElementById("product-search");
+            const searchResults   = document.getElementById("search-results");
+            const linesTbody      = document.getElementById("lines-tbody");
+            const linesJsonInput  = document.getElementById("lines-json");
+            const totalSubtotal   = document.getElementById("total-subtotal");
+            const totalVat        = document.getElementById("total-vat");
+            const totalGrand      = document.getElementById("total-grand");
+            const postBtn         = document.getElementById("post-grn-btn");
+            const supplierSelect  = document.getElementById("supplier-select");
+            const grnForm         = document.getElementById("grn-form");
+
+
+            // ----- Formatting helpers -----
+            function formatRand(cents) {
+                if (typeof cents !== "number" || isNaN(cents)) return "R 0.00";
+                const rands = cents / 100;
+                return "R " + rands.toLocaleString("en-ZA", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
+            }
+
+
+            // ----- Product search -----
+            let searchTimer = null;
+            searchInput.addEventListener("input", () => {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(performSearch, 120);
+            });
+
+            function performSearch() {
+                const q = searchInput.value.trim().toLowerCase();
+                if (q.length < 1) {
+                    searchResults.hidden = true;
+                    return;
+                }
+
+                const matches = products
+                    .filter(p =>
+                        p.name.toLowerCase().includes(q) ||
+                        (p.sku || "").toLowerCase().includes(q)
+                    )
+                    .slice(0, 8);
+
+                if (matches.length === 0) {
+                    searchResults.innerHTML = '<div class="search-empty">No matching products</div>';
+                    searchResults.hidden = false;
+                    return;
+                }
+
+                searchResults.innerHTML = matches.map(p => `
+                    <button type="button" class="search-result" data-product-id="${p.id}">
+                        <div class="result-name">${escapeHtml(p.name)}</div>
+                        <div class="result-meta">
+                            <span class="result-sku">${escapeHtml(p.sku || "")}</span>
+                            <span class="result-cost">cost R ${(p.cost_cents / 100).toFixed(2)}</span>
+                            <span class="result-vat">${p.vat_rate_percent}% VAT</span>
+                        </div>
+                    </button>
+                `).join("");
+                searchResults.hidden = false;
+            }
+
+            // Handle clicks on search results
+            searchResults.addEventListener("click", (e) => {
+                const btn = e.target.closest(".search-result");
+                if (!btn) return;
+                const productId = parseInt(btn.dataset.productId, 10);
+                addLine(productId);
+                searchInput.value = "";
+                searchResults.hidden = true;
+                searchInput.focus();
+            });
+
+
+            // ----- Add a line -----
+            function addLine(productId) {
+                const product = productsById.get(productId);
+                if (!product) return;
+
+                // If this product is already a line, just bump its quantity
+                const existing = lines.find(l => l.product_id === productId);
+                if (existing) {
+                    existing.quantity += 1;
+                } else {
+                    lines.push({
+                        product_id:        productId,
+                        quantity:          1,
+                        unit_cost_cents:   product.cost_cents || 0,
+                    });
+                }
+
+                renderLines();
+            }
+
+
+            // ----- Remove a line -----
+            function removeLine(productId) {
+                const idx = lines.findIndex(l => l.product_id === productId);
+                if (idx >= 0) {
+                    lines.splice(idx, 1);
+                    renderLines();
+                }
+            }
+
+
+            // ----- Render the lines table -----
+            function renderLines() {
+                if (lines.length === 0) {
+                    linesTbody.innerHTML = `
+                        <tr id="empty-row">
+                            <td colspan="6" class="empty-cell">
+                                Search for a product above to add a line.
+                            </td>
+                        </tr>
+                    `;
+                    updateTotals();
+                    return;
+                }
+
+                linesTbody.innerHTML = lines.map((line, idx) => {
+                    const p = productsById.get(line.product_id);
+                    const vatRate = p.vat_rate_percent || 0;
+                    const subtotal = line.unit_cost_cents * line.quantity;
+                    const vat = Math.round(subtotal * vatRate / 100);
+                    const total = subtotal + vat;
+
+                    return `
+                        <tr data-product-id="${line.product_id}">
+                            <td class="col-product">
+                                <div class="line-name">${escapeHtml(p.name)}</div>
+                                <div class="line-meta">${escapeHtml(p.sku || "")}</div>
+                            </td>
+                            <td class="col-qty num">
+                                <input type="number"
+                                       class="line-qty"
+                                       min="1"
+                                       step="1"
+                                       value="${line.quantity}"
+                                       data-idx="${idx}" />
+                            </td>
+                            <td class="col-cost num">
+                                <input type="number"
+                                       class="line-cost"
+                                       min="0"
+                                       step="0.01"
+                                       value="${(line.unit_cost_cents / 100).toFixed(2)}"
+                                       data-idx="${idx}" />
+                            </td>
+                            <td class="col-vat num">${vatRate}%</td>
+                            <td class="col-total num"><strong>${formatRand(total)}</strong></td>
+                            <td class="col-remove">
+                                <button type="button" class="btn-tiny btn-tiny-danger"
+                                        data-remove-id="${line.product_id}">×</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join("");
+
+                updateTotals();
+            }
+
+
+            // ----- React to qty/cost edits and remove clicks -----
+          linesTbody.addEventListener("input", (e) => {
+    const idx = parseInt(e.target.dataset.idx, 10);
+    if (isNaN(idx)) return;
+
+    if (e.target.classList.contains("line-qty")) {
+        const q = parseInt(e.target.value, 10);
+        lines[idx].quantity = (q > 0) ? q : 1;
+    } else if (e.target.classList.contains("line-cost")) {
+        const r = parseFloat(e.target.value);
+        lines[idx].unit_cost_cents = isNaN(r) ? 0 : Math.round(r * 100);
+    } else {
+        return;
+    }
+
+    // Update just the line total cell for this row
+    const tr = e.target.closest("tr");
+    const line = lines[idx];
+    const p = productsById.get(line.product_id);
+    const vatRate = p.vat_rate_percent || 0;
+    const subtotal = line.unit_cost_cents * line.quantity;
+    const vat = Math.round(subtotal * vatRate / 100);
+    const total = subtotal + vat;
+    tr.querySelector(".col-total").innerHTML = "<strong>" + formatRand(total) + "</strong>";
+
+    updateTotals();
+});
+
+            linesTbody.addEventListener("click", (e) => {
+                const btn = e.target.closest("[data-remove-id]");
+                if (!btn) return;
+                const productId = parseInt(btn.dataset.removeId, 10);
+                removeLine(productId);
+            });
+
+
+            // ----- Update grand totals + JSON field -----
+            function updateTotals() {
+                let subtotal = 0, vat = 0;
+
+                for (const line of lines) {
+                    const p = productsById.get(line.product_id);
+                    const vatRate = p.vat_rate_percent || 0;
+                    const lineSub = line.unit_cost_cents * line.quantity;
+                    const lineVat = Math.round(lineSub * vatRate / 100);
+                    subtotal += lineSub;
+                    vat      += lineVat;
+                }
+
+                totalSubtotal.textContent = formatRand(subtotal);
+                totalVat.textContent      = formatRand(vat);
+                totalGrand.textContent    = formatRand(subtotal + vat);
+
+                // Pack lines into the hidden JSON input for form submission
+                linesJsonInput.value = JSON.stringify(lines);
+
+                // Enable Post button only when we have a supplier AND lines
+                const hasSupplier = !!supplierSelect.value;
+                const hasLines    = lines.length > 0;
+                postBtn.disabled = !(hasSupplier && hasLines);
+            }
+
+
+            // ----- Enable/disable submit when supplier changes -----
+            supplierSelect.addEventListener("change", updateTotals);
+
+
+            // ----- Block double-submit -----
+            grnForm.addEventListener("submit", () => {
+                postBtn.disabled = true;
+                postBtn.textContent = "Posting...";
+            });
+
+
+            // ----- HTML-escape utility -----
+            function escapeHtml(s) {
+                return String(s)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+
+            // ----- Hide search results when clicking outside -----
+            document.addEventListener("click", (e) => {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.hidden = true;
+                }
+            });
+
+
+            // ----- Initial render -----
+            renderLines();
+        })();
+    </script>
+
+</body>
+</html>

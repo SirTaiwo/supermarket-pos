@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn" class="active">Goods received</a>
+                <a href="/reports/daily">Reports</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="grn-detail-page">
+
+            <div class="form-header">
+                <div>
+                    <h1>
+                        <%= grn.reference %>
+                        <% if (grn.status === 'voided') { %>
+                            <span class="status-pill status-inactive">VOIDED</span>
+                        <% } else { %>
+                            <span class="status-pill status-active">Posted</span>
+                        <% } %>
+                    </h1>
+                    <p class="page-subtitle">
+                        Received <%= formatDate(grn.received_at) %> by <%= grn.received_by_name %>
+                    </p>
+                </div>
+                <a href="/grn" class="form-back">← Back to deliveries</a>
+            </div>
+
+            <!-- ===== Header summary card ===== -->
+            <div class="grn-summary-grid">
+
+                <div class="summary-card">
+                    <div class="summary-card-label">Supplier</div>
+                    <div class="summary-card-value"><%= grn.supplier_name %></div>
+                    <% if (grn.supplier_contact) { %>
+                        <div class="summary-card-meta"><%= grn.supplier_contact %></div>
+                    <% } %>
+                    <% if (grn.supplier_phone) { %>
+                        <div class="summary-card-meta"><%= grn.supplier_phone %></div>
+                    <% } %>
+                    <% if (grn.supplier_payment_terms) { %>
+                        <div class="summary-card-meta">
+                            Terms: <span class="terms-pill"><%= grn.supplier_payment_terms %></span>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-label">Supplier's invoice</div>
+                    <div class="summary-card-value">
+                        <% if (grn.supplier_invoice) { %>
+                            <%= grn.supplier_invoice %>
+                        <% } else { %>
+                            <span class="cell-meta">— not recorded —</span>
+                        <% } %>
+                    </div>
+                </div>
+
+                <% if (grn.notes) { %>
+                    <div class="summary-card summary-card-full">
+                        <div class="summary-card-label">Notes</div>
+                        <div class="summary-card-value summary-card-notes"><%= grn.notes %></div>
+                    </div>
+                <% } %>
+
+            </div>
+
+            <!-- ===== Line items ===== -->
+            <h2 class="section-heading">Line items received</h2>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="num">Qty</th>
+                            <th class="num">Unit cost (excl)</th>
+                            <th class="num">VAT %</th>
+                            <th class="num">Line VAT</th>
+                            <th class="num">Line total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% items.forEach(item => { %>
+                            <tr>
+                                <td>
+                                    <div class="cell-name"><%= item.product_name %></div>
+                                    <div class="cell-meta"><%= item.product_sku %></div>
+                                </td>
+                                <td class="num"><%= item.quantity %></td>
+                                <td class="num"><%= formatRand(item.unit_cost_cents) %></td>
+                                <td class="num"><%= item.vat_rate_percent %>%</td>
+                                <td class="num"><%= formatRand(item.line_vat_cents) %></td>
+                                <td class="num"><strong><%= formatRand(item.line_total_cents) %></strong></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ===== Totals ===== -->
+            <div class="grn-totals">
+                <div class="totals-row">
+                    <span class="totals-label">Subtotal (excl VAT)</span>
+                    <span class="totals-value"><%= formatRand(grn.subtotal_cents) %></span>
+                </div>
+                <div class="totals-row">
+                    <span class="totals-label">VAT</span>
+                    <span class="totals-value"><%= formatRand(grn.vat_cents) %></span>
+                </div>
+                <div class="totals-row totals-row-grand">
+                    <span class="totals-label">Total</span>
+                    <span class="totals-value"><%= formatRand(grn.total_cents) %></span>
+                </div>
+            </div>
+
+            <!-- ===== Footer info ===== -->
+            <div class="grn-footer-meta">
+                <p>
+                    This GRN was posted on <%= formatDate(grn.received_at) %>
+                    and cannot be edited. Stock corrections must be made through
+                    a <strong>stock adjustment</strong>, preserving the audit trail.
+                </p>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 2</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

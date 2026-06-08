@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/stock-adjustments" class="active">Adjustments</a>
+                <a href="/reports/daily">Reports</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="page-header">
+            <div>
+                <h1>Stock adjustments</h1>
+                <p class="page-subtitle">
+                    <% if (adjustments.length === 0) { %>
+                        No adjustments recorded yet
+                    <% } else { %>
+                        <%= adjustments.length %> adjustment<%= adjustments.length === 1 ? '' : 's' %> recorded
+                    <% } %>
+                </p>
+            </div>
+            <a href="/stock-adjustments/new" class="btn-primary">+ New adjustment</a>
+        </div>
+
+        <% if (adjustments.length === 0) { %>
+
+            <div class="empty-state">
+                <p>
+                    Record stock changes from damage, expiry, theft, physical count
+                    variances, or stock found. Every adjustment requires a reason
+                    and preserves a full audit trail.
+                </p>
+                <a href="/stock-adjustments/new" class="btn-primary">Record your first adjustment</a>
+            </div>
+
+        <% } else { %>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>When</th>
+                            <th>Product</th>
+                            <th class="num">Change</th>
+                            <th class="num">Before</th>
+                            <th class="num">After</th>
+                            <th>Reason</th>
+                            <th>By</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% adjustments.forEach(a => { %>
+                            <tr>
+                                <td>
+                                    <div class="cell-name"><%= a.reference %></div>
+                                </td>
+                                <td>
+                                    <div><%= formatDate(a.created_at) %></div>
+                                </td>
+                                <td>
+                                    <div class="cell-name"><%= a.product_name %></div>
+                                    <div class="cell-meta"><%= a.product_sku %></div>
+                                </td>
+                                <td class="num">
+                                    <% if (a.quantity_change > 0) { %>
+                                        <span class="change-pill change-positive">+<%= a.quantity_change %></span>
+                                    <% } else { %>
+                                        <span class="change-pill change-negative"><%= a.quantity_change %></span>
+                                    <% } %>
+                                </td>
+                                <td class="num"><%= a.before_qty %></td>
+                                <td class="num"><strong><%= a.after_qty %></strong></td>
+                                <td>
+                                    <span class="reason-pill reason-<%= a.reason_direction %>">
+                                        <%= a.reason_code %>
+                                    </span>
+                                    <div class="cell-meta"><%= a.reason_name %></div>
+                                </td>
+                                <td>
+                                    <div class="cell-meta"><%= a.adjusted_by_name %></div>
+                                </td>
+                                <td>
+                                    <% if (a.note) { %>
+                                        <div class="cell-meta cell-note"><%= a.note %></div>
+                                    <% } else { %>
+                                        <span class="cell-meta">—</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+        <% } %>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 2</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

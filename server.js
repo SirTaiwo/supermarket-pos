@@ -102,6 +102,10 @@ app.use("/", require("./routes/products"));
 app.use("/", require("./routes/reports"));
 // Suppliers management (manager only) - Phase 2
 app.use("/", require("./routes/suppliers"));
+// Goods Received Notes (manager only) - Phase 2
+app.use("/", require("./routes/grn"));
+// Stock adjustments (manager only) - Phase 2
+app.use("/", require("./routes/stock-adjustments"));
 
 
 // =====================================================

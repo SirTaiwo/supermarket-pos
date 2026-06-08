@@ -1340,3 +1340,223 @@ a { color: inherit; }
     background: #fce7f3;
     color: #9d174d;
 }
+/* ===================================================
+   GRN detail view (Phase 2)
+   =================================================== */
+
+.grn-detail-page {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.grn-detail-page .form-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.grn-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 1.5rem;
+    margin: 1.5rem 0 2rem 0;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.summary-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+}
+
+.summary-card-full {
+    grid-column: 1 / -1;
+}
+
+.summary-card-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+}
+
+.summary-card-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.25rem;
+}
+
+.summary-card-meta {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 0.15rem;
+}
+
+.summary-card-notes {
+    font-weight: 400;
+    white-space: pre-wrap;
+}
+
+.grn-footer-meta {
+    margin-top: 1.5rem;
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+    border-left: 3px solid #cbd5e1;
+    border-radius: 4px;
+    color: #64748b;
+    font-size: 0.88rem;
+}
+
+.grn-footer-meta p {
+    margin: 0;
+}
+
+@media (max-width: 780px) {
+    .grn-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* ===================================================
+   Stock adjustments (Phase 2)
+   =================================================== */
+
+/* Pills showing the change (+5, -4 etc.) */
+.change-pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+.change-positive {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.change-negative {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Pills showing the reason code */
+.reason-pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.reason-negative {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.reason-positive {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.reason-either {
+    background: #fef3c7;
+    color: #854d0e;
+    border: 1px solid #fde68a;
+}
+
+/* Adjustment form page */
+.adj-form-page {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Preview box on the form */
+.adj-preview {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    min-height: 70px;
+}
+
+.preview-empty {
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.preview-product {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+
+.preview-flow {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-size: 1.5rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.preview-before {
+    color: #64748b;
+}
+
+.preview-arrow {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.preview-arrow.change-positive {
+    color: #15803d;
+    background: transparent;
+    padding: 0;
+}
+
+.preview-arrow.change-negative {
+    color: #b91c1c;
+    background: transparent;
+    padding: 0;
+}
+
+.preview-after {
+    color: #0f172a;
+}
+
+.preview-warning {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.65rem;
+    background: #fef2f2;
+    border-radius: 6px;
+    color: #991b1b;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Cell with a note - constrain width so it doesn't crowd the row */
+.cell-note {
+    max-width: 200px;
+    white-space: normal;
+}
+
+/* ===================================================
+   Stock adjustments (Phase 2)
+   =================================================== */
