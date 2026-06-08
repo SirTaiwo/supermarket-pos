@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/reports/daily">Reports</a>
+                <a href="/users" class="active">Users</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="form-page">
+
+            <div class="form-header">
+                <h1><%= formTitle %></h1>
+                <a href="/users" class="form-back">← Back to users</a>
+            </div>
+
+            <form method="POST" action="<%= formAction %>" class="product-form">
+
+                <div class="form-grid">
+
+                    <!-- Full name -->
+                    <label class="field field-full">
+                        <span class="field-label">Full name <span class="req">*</span></span>
+                        <input
+                            type="text"
+                            name="full_name"
+                            value="<%= user ? user.full_name : '' %>"
+                            required
+                            placeholder="e.g. Lerato Mthembu"
+                        />
+                    </label>
+
+                    <!-- Username (only for new users; immutable for existing) -->
+                    <% if (!user) { %>
+                        <label class="field">
+                            <span class="field-label">Username <span class="req">*</span></span>
+                            <input
+                                type="text"
+                                name="username"
+                                required
+                                pattern="[a-zA-Z0-9_.-]+"
+                                placeholder="e.g. nomvula"
+                            />
+                            <span class="field-hint">Letters, numbers, dot, dash, underscore. Lowercased.</span>
+                        </label>
+                    <% } else { %>
+                        <label class="field">
+                            <span class="field-label">Username</span>
+                            <input
+                                type="text"
+                                value="<%= user.username %>"
+                                disabled
+                            />
+                            <span class="field-hint">Username cannot be changed once set.</span>
+                        </label>
+                    <% } %>
+
+                    <!-- Role -->
+                    <label class="field">
+                        <span class="field-label">Role <span class="req">*</span></span>
+                        <select name="role" required>
+                            <option value="cashier" <%= user && user.role === 'cashier' ? 'selected' : '' %>>Cashier</option>
+                            <option value="manager" <%= user && user.role === 'manager' ? 'selected' : '' %>>Manager</option>
+                        </select>
+                        <span class="field-hint">
+                            Cashiers use the till. Managers have full access.
+                        </span>
+                    </label>
+
+                    <% if (!user) { %>
+                        <!-- Password (only for new users; existing users use the reset flow) -->
+                        <label class="field">
+                            <span class="field-label">Password <span class="req">*</span></span>
+                            <input
+                                type="password"
+                                name="password"
+                                required
+                                minlength="8"
+                                placeholder="Minimum 8 characters"
+                            />
+                            <span class="field-hint">At least 8 characters.</span>
+                        </label>
+
+                        <label class="field">
+                            <span class="field-label">Confirm password <span class="req">*</span></span>
+                            <input
+                                type="password"
+                                name="confirm_password"
+                                required
+                                minlength="8"
+                                placeholder="Re-enter password"
+                            />
+                        </label>
+                    <% } %>
+
+                </div>
+
+                <div class="form-actions">
+                    <a href="/users" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary"><%= submitLabel %></button>
+                </div>
+
+            </form>
+
+            <% if (user) { %>
+                <div class="form-side-notes">
+                    <p>
+                        To change <strong><%= user.full_name %></strong>'s password,
+                        use the <a href="/users/<%= user.id %>/reset-password">password reset</a>.
+                    </p>
+                </div>
+            <% } %>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 2</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

@@ -14,6 +14,7 @@
 const express = require("express");
 const db = require("../data/db");
 const { requireManager } = require("../middleware/auth");
+const { formatRand, formatDate } = require("../middleware/helpers");
 
 const router = express.Router();
 
@@ -101,6 +102,89 @@ router.post("/suppliers", requireManager, (req, res) => {
         req.flash("error", "Could not add supplier: " + err.message);
         res.redirect("/suppliers/new");
     }
+});
+
+// =====================================================
+// GET /suppliers/:id — supplier detail page
+// =====================================================
+// Shows full supplier info plus activity (recent GRNs,
+// products typically supplied, totals).
+// =====================================================
+router.get("/suppliers/:id", requireManager, (req, res) => {
+    const supplierId = parseInt(req.params.id, 10);
+
+    const supplier = db.prepare(`
+        SELECT *
+        FROM suppliers
+        WHERE id = ?
+    `).get(supplierId);
+
+    if (!supplier) {
+        return res.status(404).render("error", {
+            title:   "Supplier not found",
+            message: `No supplier with ID ${supplierId}.`,
+        });
+    }
+
+    // ----- Activity summary -----
+    const summary = db.prepare(`
+        SELECT
+            COUNT(*)         AS grn_count,
+            COALESCE(SUM(total_cents), 0) AS total_spent_cents,
+            MAX(received_at) AS last_delivery_at,
+            AVG(total_cents) AS avg_value_cents
+        FROM goods_received_notes
+        WHERE supplier_id = ? AND status = 'posted'
+    `).get(supplierId);
+
+    // ----- Recent GRNs (last 20) -----
+    const recentGrns = db.prepare(`
+        SELECT
+            g.id,
+            g.reference,
+            g.received_at,
+            g.supplier_invoice,
+            g.subtotal_cents,
+            g.vat_cents,
+            g.total_cents,
+            u.full_name AS received_by_name,
+            (SELECT COUNT(*) FROM goods_received_items WHERE grn_id = g.id) AS line_count,
+            (SELECT SUM(quantity) FROM goods_received_items WHERE grn_id = g.id) AS total_units
+        FROM goods_received_notes g
+        LEFT JOIN users u ON g.received_by = u.id
+        WHERE g.supplier_id = ? AND g.status = 'posted'
+        ORDER BY g.received_at DESC
+        LIMIT 20
+    `).all(supplierId);
+
+    // ----- Products typically supplied -----
+    const products = db.prepare(`
+        SELECT
+            gi.product_id,
+            gi.product_name,
+            gi.product_sku,
+            SUM(gi.quantity)            AS total_units,
+            COUNT(DISTINCT gi.grn_id)   AS delivery_count,
+            SUM(gi.line_total_cents)    AS total_spent_cents,
+            MAX(g.received_at)          AS last_delivered_at
+        FROM goods_received_items gi
+        JOIN goods_received_notes g ON gi.grn_id = g.id
+        WHERE g.supplier_id = ? AND g.status = 'posted'
+        GROUP BY gi.product_id, gi.product_name, gi.product_sku
+        ORDER BY total_units DESC, gi.product_name ASC
+        LIMIT 20
+    `).all(supplierId);
+
+    res.render("suppliers-detail", {
+        title:       supplier.name,
+        active:      "suppliers",
+        supplier:    supplier,
+        summary:     summary,
+        recentGrns:  recentGrns,
+        products:    products,
+        formatRand:  formatRand,
+        formatDate:  formatDate,
+    });
 });
 
 

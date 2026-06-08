@@ -106,7 +106,10 @@ app.use("/", require("./routes/suppliers"));
 app.use("/", require("./routes/grn"));
 // Stock adjustments (manager only) - Phase 2
 app.use("/", require("./routes/stock-adjustments"));
-
+// Stock movements report (manager only) - Phase 2
+app.use("/", require("./routes/stock-movements"));
+// User management (manager only) - Phase 2
+app.use("/", require("./routes/users"));
 
 // =====================================================
 // 404 HANDLER

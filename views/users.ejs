@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/reports/daily">Reports</a>
+                <a href="/users" class="active">Users</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="page-header">
+            <div>
+                <h1>Users</h1>
+                <p class="page-subtitle">
+                    <%= users.length %> user<%= users.length === 1 ? '' : 's' %> in the system
+                </p>
+            </div>
+            <a href="/users/new" class="btn-primary">+ Add user</a>
+        </div>
+
+        <% if (users.length === 0) { %>
+
+            <div class="empty-state">
+                <p>No users in the system. This shouldn't happen — seed the database.</p>
+            </div>
+
+        <% } else { %>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th class="num">Sales</th>
+                            <th>Last active</th>
+                            <th class="actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(u => { %>
+                            <tr class="<%= u.is_active ? '' : 'row-inactive' %>">
+                                <td>
+                                    <div class="cell-name"><%= u.full_name %></div>
+                                    <% if (u.id === currentUser.id) { %>
+                                        <div class="cell-meta cell-meta-strong">(you)</div>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div class="cell-meta cell-meta-mono"><%= u.username %></div>
+                                </td>
+                                <td>
+                                    <% if (u.role === 'manager') { %>
+                                        <span class="role-pill role-manager">Manager</span>
+                                    <% } else { %>
+                                        <span class="role-pill role-cashier">Cashier</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (u.is_active) { %>
+                                        <span class="status-pill status-active">Active</span>
+                                    <% } else { %>
+                                        <span class="status-pill status-inactive">Inactive</span>
+                                    <% } %>
+                                </td>
+                                <td class="num"><%= u.sales_count %></td>
+                                <td>
+                                    <% if (u.last_active_at) { %>
+                                        <div class="cell-meta"><%= formatDate(u.last_active_at) %></div>
+                                    <% } else { %>
+                                        <span class="cell-meta">—</span>
+                                    <% } %>
+                                </td>
+                                <td class="actions-col">
+                                    <a href="/users/<%= u.id %>/edit" class="btn-tiny">Edit</a>
+                                    <a href="/users/<%= u.id %>/reset-password" class="btn-tiny">Reset password</a>
+                                    <% if (u.id !== currentUser.id) { %>
+                                        <form method="POST" action="/users/<%= u.id %>/toggle" style="display:inline;"
+                                              onsubmit="return confirm(this.dataset.confirm)"
+                                              data-confirm="<%= u.is_active ? 'Deactivate' : 'Reactivate' %> this user?">
+                                            <button type="submit" class="btn-tiny btn-tiny-danger">
+                                                <%= u.is_active ? 'Deactivate' : 'Reactivate' %>
+                                            </button>
+                                        </form>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+        <% } %>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 2</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers" class="active">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/reports/daily">Reports</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="supplier-detail-page">
+
+            <div class="form-header">
+                <div>
+                    <h1>
+                        <%= supplier.name %>
+                        <% if (supplier.is_active) { %>
+                            <span class="status-pill status-active">Active</span>
+                        <% } else { %>
+                            <span class="status-pill status-inactive">Inactive</span>
+                        <% } %>
+                    </h1>
+                    <% if (supplier.payment_terms) { %>
+                        <p class="page-subtitle">
+                            Payment terms: <span class="terms-pill"><%= supplier.payment_terms %></span>
+                        </p>
+                    <% } %>
+                </div>
+                <div class="detail-actions">
+                    <a href="/suppliers" class="btn-secondary">← Back</a>
+                    <a href="/suppliers/<%= supplier.id %>/edit" class="btn-primary">Edit supplier</a>
+                </div>
+            </div>
+
+            <!-- ===== Activity summary cards ===== -->
+            <div class="summary-stat-grid">
+
+                <div class="stat-card">
+                    <div class="stat-card-label">Total deliveries</div>
+                    <div class="stat-card-value"><%= summary.grn_count %></div>
+                    <div class="stat-card-meta">GRNs posted</div>
+                </div>
+
+                <div class="stat-card stat-card-positive">
+                    <div class="stat-card-label">Total spent</div>
+                    <div class="stat-card-value"><%= formatRand(summary.total_spent_cents) %></div>
+                    <div class="stat-card-meta">VAT inclusive</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-label">Average delivery</div>
+                    <div class="stat-card-value">
+                        <% if (summary.grn_count > 0) { %>
+                            <%= formatRand(Math.round(summary.avg_value_cents)) %>
+                        <% } else { %>
+                            —
+                        <% } %>
+                    </div>
+                    <div class="stat-card-meta">per GRN</div>
+                </div>
+
+                <div class="stat-card stat-card-bold">
+                    <div class="stat-card-label">Last delivery</div>
+                    <div class="stat-card-value last-delivery-value">
+                        <% if (summary.last_delivery_at) { %>
+                            <%= formatDate(summary.last_delivery_at) %>
+                        <% } else { %>
+                            —
+                        <% } %>
+                    </div>
+                    <div class="stat-card-meta">most recent receipt</div>
+                </div>
+
+            </div>
+
+            <!-- ===== Contact info card ===== -->
+            <h2 class="section-heading">Contact details</h2>
+
+            <div class="contact-grid">
+
+                <div class="contact-item">
+                    <div class="contact-label">Contact person</div>
+                    <div class="contact-value">
+                        <%= supplier.contact_person || '—' %>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-label">Phone</div>
+                    <div class="contact-value">
+                        <% if (supplier.phone) { %>
+                            <a href="tel:<%= supplier.phone %>"><%= supplier.phone %></a>
+                        <% } else { %>
+                            —
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-label">Email</div>
+                    <div class="contact-value">
+                        <% if (supplier.email) { %>
+                            <a href="mailto:<%= supplier.email %>"><%= supplier.email %></a>
+                        <% } else { %>
+                            —
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-label">Account number</div>
+                    <div class="contact-value">
+                        <%= supplier.account_number || '—' %>
+                    </div>
+                </div>
+
+                <% if (supplier.address) { %>
+                    <div class="contact-item contact-item-full">
+                        <div class="contact-label">Address</div>
+                        <div class="contact-value"><%= supplier.address %></div>
+                    </div>
+                <% } %>
+
+                <% if (supplier.notes) { %>
+                    <div class="contact-item contact-item-full">
+                        <div class="contact-label">Notes</div>
+                        <div class="contact-value contact-notes"><%= supplier.notes %></div>
+                    </div>
+                <% } %>
+
+            </div>
+
+
+            <!-- ===== Products typically supplied ===== -->
+            <% if (products.length > 0) { %>
+
+                <h2 class="section-heading">Products supplied</h2>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="num">Units received</th>
+                                <th class="num">Deliveries</th>
+                                <th class="num">Total spent</th>
+                                <th>Last delivered</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% products.forEach(p => { %>
+                                <tr>
+                                    <td>
+                                        <div class="cell-name"><%= p.product_name %></div>
+                                        <div class="cell-meta"><%= p.product_sku %></div>
+                                    </td>
+                                    <td class="num"><strong><%= p.total_units %></strong></td>
+                                    <td class="num"><%= p.delivery_count %></td>
+                                    <td class="num"><%= formatRand(p.total_spent_cents) %></td>
+                                    <td>
+                                        <div class="cell-meta"><%= formatDate(p.last_delivered_at) %></div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+            <% } %>
+
+
+            <!-- ===== Recent GRNs ===== -->
+            <% if (recentGrns.length > 0) { %>
+
+                <h2 class="section-heading">Recent deliveries</h2>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Received</th>
+                                <th>Their invoice</th>
+                                <th class="num">Lines</th>
+                                <th class="num">Units</th>
+                                <th class="num">Total</th>
+                                <th>By</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% recentGrns.forEach(g => { %>
+                                <tr>
+                                    <td><div class="cell-name"><%= g.reference %></div></td>
+                                    <td><%= formatDate(g.received_at) %></td>
+                                    <td>
+                                        <% if (g.supplier_invoice) { %>
+                                            <span class="cell-meta"><%= g.supplier_invoice %></span>
+                                        <% } else { %>
+                                            <span class="cell-meta">—</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="num"><%= g.line_count %></td>
+                                    <td class="num"><%= g.total_units || 0 %></td>
+                                    <td class="num"><strong><%= formatRand(g.total_cents) %></strong></td>
+                                    <td><div class="cell-meta"><%= g.received_by_name %></div></td>
+                                    <td class="actions-col">
+                                        <a href="/grn/<%= g.id %>" class="btn-tiny">View</a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+            <% } else { %>
+
+                <h2 class="section-heading">Recent deliveries</h2>
+
+                <div class="empty-state">
+                    <p>No deliveries from this supplier yet.</p>
+                    <a href="/grn/new" class="btn-primary">Record a delivery</a>
+                </div>
+
+            <% } %>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 2</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

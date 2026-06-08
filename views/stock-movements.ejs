@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/reports/daily" class="active">Reports</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="page-header">
+            <div>
+                <h1>Stock movements</h1>
+                <p class="page-subtitle">
+                    Every change in stock — sales, deliveries, adjustments — in one view
+                </p>
+            </div>
+            <div class="report-nav">
+                <a href="/reports/daily" class="btn-secondary">Daily sales report →</a>
+            </div>
+        </div>
+
+        <!-- ===== Filter form ===== -->
+        <form method="GET" action="/reports/stock-movements" class="report-filters">
+
+            <div class="filter-grid">
+
+                <label class="field">
+                    <span class="field-label">Product</span>
+                    <select name="product_id">
+                        <option value="all" <%= filters.productFilter === 'all' ? 'selected' : '' %>>All products</option>
+                        <% products.forEach(p => { %>
+                            <option value="<%= p.id %>" <%= filters.productFilter === String(p.id) ? 'selected' : '' %>>
+                                <%= p.name %> (<%= p.sku %>)
+                            </option>
+                        <% }) %>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span class="field-label">From</span>
+                    <input type="date" name="from" value="<%= filters.dateFrom %>" />
+                </label>
+
+                <label class="field">
+                    <span class="field-label">To</span>
+                    <input type="date" name="to" value="<%= filters.dateTo %>" />
+                </label>
+
+                <div class="field field-full">
+                    <span class="field-label">Movement types</span>
+                    <div class="filter-checkboxes">
+                        <label class="check-pill">
+                            <input type="checkbox" name="types_sales" value="1" <%= filters.includeSales ? 'checked' : '' %> />
+                            <span>Sales</span>
+                        </label>
+                        <label class="check-pill">
+                            <input type="checkbox" name="types_grns" value="1" <%= filters.includeGrns ? 'checked' : '' %> />
+                            <span>Deliveries (GRN)</span>
+                        </label>
+                        <label class="check-pill">
+                            <input type="checkbox" name="types_adj" value="1" <%= filters.includeAdj ? 'checked' : '' %> />
+                            <span>Adjustments</span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="filter-actions">
+                <a href="/reports/stock-movements" class="btn-secondary">Reset filters</a>
+                <button type="submit" class="btn-primary">Apply filters</button>
+            </div>
+
+        </form>
+
+        <!-- ===== Summary card ===== -->
+        <div class="movements-summary">
+            <h2 class="section-heading">Summary</h2>
+            <div class="summary-stat-grid">
+
+                <div class="stat-card stat-card-negative">
+                    <div class="stat-card-label">Sales out</div>
+                    <div class="stat-card-value">-<%= summary.sales_units %></div>
+                    <div class="stat-card-meta">units sold</div>
+                </div>
+
+                <div class="stat-card stat-card-positive">
+                    <div class="stat-card-label">Received in</div>
+                    <div class="stat-card-value">+<%= summary.grns_units %></div>
+                    <div class="stat-card-meta">units from suppliers</div>
+                </div>
+
+                <div class="stat-card stat-card-neutral">
+                    <div class="stat-card-label">Adjustments</div>
+                    <div class="stat-card-value">
+                        <% if (summary.adj_positive_units > 0) { %>
+                            +<%= summary.adj_positive_units %>
+                        <% } %>
+                        <% if (summary.adj_negative_units > 0) { %>
+                            <% if (summary.adj_positive_units > 0) { %> / <% } %>
+                            -<%= summary.adj_negative_units %>
+                        <% } %>
+                        <% if (summary.adj_positive_units === 0 && summary.adj_negative_units === 0) { %>
+                            0
+                        <% } %>
+                    </div>
+                    <div class="stat-card-meta">corrections recorded</div>
+                </div>
+
+                <div class="stat-card stat-card-bold">
+                    <div class="stat-card-label">Net change</div>
+                    <div class="stat-card-value <%= summary.net_change >= 0 ? 'net-positive' : 'net-negative' %>">
+                        <%= summary.net_change >= 0 ? '+' : '' %><%= summary.net_change %>
+                    </div>
+                    <div class="stat-card-meta"><%= summary.total_rows %> total movement<%= summary.total_rows === 1 ? '' : 's' %></div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===== Movements table ===== -->
+        <h2 class="section-heading">Movement log</h2>
+
+        <% if (movements.length === 0) { %>
+
+            <div class="empty-state">
+                <p>No movements match your filters. Try widening the date range or enabling more movement types.</p>
+            </div>
+
+        <% } else { %>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>When</th>
+                            <th>Type</th>
+                            <th>Product</th>
+                            <th class="num">Qty</th>
+                            <th>Reference</th>
+                            <th>By</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% movements.forEach(m => { %>
+                            <tr>
+                                <td>
+                                    <div><%= formatDate(m.when_at) %></div>
+                                </td>
+                                <td>
+                                    <% if (m.movement_type === 'SALE') { %>
+                                        <span class="type-pill type-sale">SALE</span>
+                                    <% } else if (m.movement_type === 'GRN') { %>
+                                        <span class="type-pill type-grn">GRN</span>
+                                    <% } else { %>
+                                        <span class="type-pill type-adj">ADJ</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div class="cell-name"><%= m.product_name %></div>
+                                    <div class="cell-meta"><%= m.product_sku %></div>
+                                </td>
+                                <td class="num">
+                                    <% if (m.quantity_change > 0) { %>
+                                        <span class="change-pill change-positive">+<%= m.quantity_change %></span>
+                                    <% } else { %>
+                                        <span class="change-pill change-negative"><%= m.quantity_change %></span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div class="cell-name"><%= m.reference %></div>
+                                </td>
+                                <td>
+                                    <div class="cell-meta"><%= m.user_name %></div>
+                                </td>
+                                <td>
+                                    <% if (m.note) { %>
+                                        <div class="cell-meta cell-note"><%= m.note %></div>
+                                    <% } else { %>
+                                        <span class="cell-meta">—</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <% if (movements.length === 500) { %>
+                <p class="page-subtitle" style="text-align: center; margin-top: 1rem;">
+                    Showing the first 500 movements. Narrow your filters to see more.
+                </p>
+            <% } %>
+
+        <% } %>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 2</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

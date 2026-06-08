@@ -86,13 +86,7 @@
                                         <div class="cell-meta"><%= s.phone %></div>
                                     <% } %>
                                 </td>
-                                <td>
-                                    <% if (s.payment_terms) { %>
-                                        <span class="terms-pill"><%= s.payment_terms %></span>
-                                    <% } else { %>
-                                        <span class="cell-meta">&mdash;</span>
-                                    <% } %>
-                                </td>
+                               <a href="/suppliers/<%= s.id %>" class="cell-name cell-link"><%= s.name %></a>
                                 <td class="num"><%= s.grn_count %></td>
                                 <td>
                                     <% if (s.is_active) { %>
