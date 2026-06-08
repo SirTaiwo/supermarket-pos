@@ -100,6 +100,8 @@ app.use("/", require("./routes/pos"));
 app.use("/", require("./routes/products"));
 // Reports (manager only)
 app.use("/", require("./routes/reports"));
+// Suppliers management (manager only) - Phase 2
+app.use("/", require("./routes/suppliers"));
 
 
 // =====================================================

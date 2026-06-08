@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers" class="active">Suppliers</a>
+                <a href="/reports/daily">Reports</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="page-header">
+            <div>
+                <h1>Suppliers</h1>
+                <p class="page-subtitle">
+                    <%= suppliers.length %> supplier<%= suppliers.length === 1 ? '' : 's' %> in the system
+                </p>
+            </div>
+            <a href="/suppliers/new" class="btn-primary">+ Add supplier</a>
+        </div>
+
+        <% if (suppliers.length === 0) { %>
+            <div class="empty-state">
+                <p>No suppliers yet.</p>
+                <a href="/suppliers/new" class="btn-primary">Add your first supplier</a>
+            </div>
+        <% } else { %>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>Terms</th>
+                            <th class="num">Deliveries</th>
+                            <th>Status</th>
+                            <th class="actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% suppliers.forEach(s => { %>
+                            <tr class="<%= s.is_active ? '' : 'row-inactive' %>">
+                                <td>
+                                    <div class="cell-name"><%= s.name %></div>
+                                    <% if (s.email) { %>
+                                        <div class="cell-meta"><%= s.email %></div>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (s.contact_person) { %>
+                                        <div><%= s.contact_person %></div>
+                                    <% } %>
+                                    <% if (s.phone) { %>
+                                        <div class="cell-meta"><%= s.phone %></div>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (s.payment_terms) { %>
+                                        <span class="terms-pill"><%= s.payment_terms %></span>
+                                    <% } else { %>
+                                        <span class="cell-meta">&mdash;</span>
+                                    <% } %>
+                                </td>
+                                <td class="num"><%= s.grn_count %></td>
+                                <td>
+                                    <% if (s.is_active) { %>
+                                        <span class="status-pill status-active">Active</span>
+                                    <% } else { %>
+                                        <span class="status-pill status-inactive">Inactive</span>
+                                    <% } %>
+                                </td>
+                                <td class="actions-col">
+                                    <a href="/suppliers/<%= s.id %>/edit" class="btn-tiny">Edit</a>
+                                    <form method="POST" action="/suppliers/<%= s.id %>/toggle" style="display:inline;"
+                                          onsubmit="return confirm(this.dataset.confirm)"
+                                          data-confirm="<%= s.is_active ? 'Deactivate' : 'Reactivate' %> this supplier?">
+                                        <button type="submit" class="btn-tiny btn-tiny-danger">
+                                            <%= s.is_active ? 'Deactivate' : 'Reactivate' %>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+        <% } %>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 2</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

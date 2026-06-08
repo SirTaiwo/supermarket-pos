@@ -24,15 +24,16 @@ console.log("Seeding Supermarket POS database...");
 // if anything fails.
 // =====================================================
 db.transaction(() => {
-    db.prepare("DELETE FROM sale_items").run();
-    db.prepare("DELETE FROM sales").run();
+    // NOTE: We deliberately do NOT clear sales or sale_items.
+    // Sales are real transactional data, not seed data.
+    // Re-seeding refreshes the catalog (products, users,
+    // suppliers, VAT categories, adjustment reasons) but
+    // preserves historical transactions.
+
     db.prepare("DELETE FROM audit_log").run();
     db.prepare("DELETE FROM products").run();
     db.prepare("DELETE FROM users").run();
     db.prepare("DELETE FROM vat_categories").run();
-
-    // Reset auto-increment counters so IDs start at 1 again
-    db.prepare("DELETE FROM sqlite_sequence").run();
 })();
 
 // =====================================================
@@ -146,6 +147,93 @@ const insertManyProducts = db.transaction((items) => {
 insertManyProducts(products);
 
 console.log(`  Inserted ${products.length} products`);
+
+// =====================================================
+// 5. SUPPLIERS (added in Phase 2)
+// =====================================================
+// Only run if the suppliers table exists (i.e., the
+// Phase 2 migration has been applied).
+// =====================================================
+const suppliersTableExists = db.prepare(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='suppliers'"
+).get();
+
+if (suppliersTableExists) {
+    db.prepare("DELETE FROM suppliers").run();
+
+    const suppliers = [
+        {
+            name:           "Tiger Brands Distribution",
+            contact_person: "Nomvula Khumalo",
+            phone:          "+27 11 840 4000",
+            email:          "orders@tigerbrands.co.za",
+            address:        "3010 William Nicol Drive, Bryanston, Johannesburg",
+            account_number: "TB-CT-2451",
+            payment_terms:  "Net 30",
+            notes:          "Primary supplier for maize meal, rice, condiments",
+        },
+        {
+            name:           "Pioneer Foods (PepsiCo SA)",
+            contact_person: "Sipho Mokoena",
+            phone:          "+27 21 974 4000",
+            email:          "trade@pioneerfoods.co.za",
+            address:        "Glacier Place, 1 Sportica Crescent, Tyger Valley, Cape Town",
+            account_number: "PF-CT-1827",
+            payment_terms:  "Net 30",
+            notes:          "Bread, cereals, juices, snacks",
+        },
+        {
+            name:           "Distell Group",
+            contact_person: "Anika van der Merwe",
+            phone:          "+27 21 809 7000",
+            email:          "trade@distell.co.za",
+            address:        "Aan-de-Wagenweg, Stellenbosch",
+            account_number: "DST-CT-9043",
+            payment_terms:  "Net 14",
+            notes:          "Beer, cider, wine, spirits — licensed liquor account",
+        },
+        {
+            name:           "Clover Industries",
+            contact_person: "Theunis Botha",
+            phone:          "+27 12 671 1900",
+            email:          "orders@clover.co.za",
+            address:        "200 Constantia Drive, Roodepoort",
+            account_number: "CLV-CT-3315",
+            payment_terms:  "Net 21",
+            notes:          "Dairy — milk, cheese, yoghurt. Cold-chain delivery required",
+        },
+        {
+            name:           "Fresh Produce Market — Epping",
+            contact_person: "Faried Davids",
+            phone:          "+27 21 534 8222",
+            email:          "info@cticfresh.co.za",
+            address:        "Epping Market, Goodwood, Cape Town",
+            account_number: "EPM-CT-0218",
+            payment_terms:  "COD",
+            notes:          "Fresh fruit and vegetables. Daily delivery available",
+        },
+    ];
+
+    const insertSupplier = db.prepare(`
+        INSERT INTO suppliers
+            (name, contact_person, phone, email, address,
+             account_number, payment_terms, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const insertManySuppliers = db.transaction((items) => {
+        for (const s of items) {
+            insertSupplier.run(
+                s.name, s.contact_person, s.phone, s.email,
+                s.address, s.account_number, s.payment_terms, s.notes
+            );
+        }
+    });
+
+    insertManySuppliers(suppliers);
+
+    console.log(`  Inserted ${suppliers.length} suppliers`);
+}
 
 // =====================================================
 // SUMMARY

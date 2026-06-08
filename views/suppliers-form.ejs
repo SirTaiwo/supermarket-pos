@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers" class="active">Suppliers</a>
+                <a href="/reports/daily">Reports</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Form ========== -->
+    <main class="page">
+
+        <div class="form-page">
+
+            <div class="form-header">
+                <h1><%= formTitle %></h1>
+                <a href="/suppliers" class="form-back">← Back to suppliers</a>
+            </div>
+
+            <form method="POST" action="<%= formAction %>" class="product-form">
+
+                <div class="form-grid">
+
+                    <!-- Name (full width) -->
+                    <label class="field field-full">
+                        <span class="field-label">Supplier name <span class="req">*</span></span>
+                        <input
+                            type="text"
+                            name="name"
+                            value="<%= supplier ? supplier.name : '' %>"
+                            required
+                            placeholder="e.g. Tiger Brands Distribution"
+                        />
+                    </label>
+
+                    <!-- Contact person -->
+                    <label class="field">
+                        <span class="field-label">Contact person</span>
+                        <input
+                            type="text"
+                            name="contact_person"
+                            value="<%= supplier && supplier.contact_person ? supplier.contact_person : '' %>"
+                            placeholder="e.g. Nomvula Khumalo"
+                        />
+                    </label>
+
+                    <!-- Phone -->
+                    <label class="field">
+                        <span class="field-label">Phone</span>
+                        <input
+                            type="text"
+                            name="phone"
+                            value="<%= supplier && supplier.phone ? supplier.phone : '' %>"
+                            placeholder="e.g. +27 11 840 4000"
+                        />
+                    </label>
+
+                    <!-- Email -->
+                    <label class="field">
+                        <span class="field-label">Email</span>
+                        <input
+                            type="email"
+                            name="email"
+                            value="<%= supplier && supplier.email ? supplier.email : '' %>"
+                            placeholder="e.g. orders@supplier.co.za"
+                        />
+                    </label>
+
+                    <!-- Account number -->
+                    <label class="field">
+                        <span class="field-label">Account number</span>
+                        <input
+                            type="text"
+                            name="account_number"
+                            value="<%= supplier && supplier.account_number ? supplier.account_number : '' %>"
+                            placeholder="Your account ref with this supplier"
+                        />
+                        <span class="field-hint">For reconciliation with their statements</span>
+                    </label>
+
+                    <!-- Address (full width) -->
+                    <label class="field field-full">
+                        <span class="field-label">Address</span>
+                        <textarea
+                            name="address"
+                            rows="2"
+                            placeholder="Street, suburb, city"
+                        ><%= supplier && supplier.address ? supplier.address : '' %></textarea>
+                    </label>
+
+                    <!-- Payment terms -->
+                    <label class="field">
+                        <span class="field-label">Payment terms</span>
+                        <select name="payment_terms">
+                            <option value="">-- None --</option>
+                            <option value="COD"     <%= supplier && supplier.payment_terms === 'COD'     ? 'selected' : '' %>>COD (Cash on delivery)</option>
+                            <option value="Net 7"   <%= supplier && supplier.payment_terms === 'Net 7'   ? 'selected' : '' %>>Net 7 days</option>
+                            <option value="Net 14"  <%= supplier && supplier.payment_terms === 'Net 14'  ? 'selected' : '' %>>Net 14 days</option>
+                            <option value="Net 21"  <%= supplier && supplier.payment_terms === 'Net 21'  ? 'selected' : '' %>>Net 21 days</option>
+                            <option value="Net 30"  <%= supplier && supplier.payment_terms === 'Net 30'  ? 'selected' : '' %>>Net 30 days</option>
+                            <option value="Net 60"  <%= supplier && supplier.payment_terms === 'Net 60'  ? 'selected' : '' %>>Net 60 days</option>
+                            <option value="Net 90"  <%= supplier && supplier.payment_terms === 'Net 90'  ? 'selected' : '' %>>Net 90 days</option>
+                        </select>
+                        <span class="field-hint">When invoices fall due</span>
+                    </label>
+
+                    <!-- Notes (full width) -->
+                    <label class="field field-full">
+                        <span class="field-label">Notes</span>
+                        <textarea
+                            name="notes"
+                            rows="3"
+                            placeholder="e.g. Cold-chain delivery required, primary supplier for dairy"
+                        ><%= supplier && supplier.notes ? supplier.notes : '' %></textarea>
+                    </label>
+
+                </div>
+
+                <div class="form-actions">
+                    <a href="/suppliers" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary"><%= submitLabel %></button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 2</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>
