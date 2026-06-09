@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/returns" class="active">Refunds</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/reports/daily">Reports</a>
+                <a href="/users">Users</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="form-page">
+
+            <div class="form-header">
+                <h1>Process refund</h1>
+                <a href="/returns" class="form-back">← Back to refunds</a>
+            </div>
+
+            <p class="page-subtitle">
+                Enter the sale reference printed on the customer's receipt to start the refund.
+            </p>
+
+            <form method="GET" action="/returns/new" class="refund-search-form">
+                <label class="field field-full">
+                    <span class="field-label">Sale reference</span>
+                    <input
+                        type="text"
+                        name="q"
+                        value="<%= q %>"
+                        placeholder="e.g. SAL-20260608-071139-502"
+                        autofocus
+                    />
+                    <span class="field-hint">
+                        Partial reference also works (e.g. "20260608" finds all sales today).
+                    </span>
+                </label>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Find sale</button>
+                </div>
+            </form>
+
+            <% if (hasSearched) { %>
+
+                <% if (results.length === 0) { %>
+
+                    <div class="empty-state">
+                        <p>No sales match "<strong><%= q %></strong>". Try a shorter or different reference.</p>
+                    </div>
+
+                <% } else { %>
+
+                    <h2 class="section-heading"><%= results.length %> match<%= results.length === 1 ? '' : 'es' %> found</h2>
+
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>When</th>
+                                    <th>Cashier</th>
+                                    <th class="num">Lines</th>
+                                    <th class="num">Units</th>
+                                    <th class="num">Total</th>
+                                    <th class="actions-col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% results.forEach(s => { %>
+                                    <tr>
+                                        <td><div class="cell-name"><%= s.reference %></div></td>
+                                        <td><%= formatDate(s.created_at) %></td>
+                                        <td><div class="cell-meta"><%= s.cashier_name %></div></td>
+                                        <td class="num"><%= s.line_count %></td>
+                                        <td class="num"><%= s.total_units || 0 %></td>
+                                        <td class="num"><strong><%= formatRand(s.total_cents) %></strong></td>
+                                        <td class="actions-col">
+                                            <a href="/returns/from-sale/<%= s.id %>" class="btn-tiny btn-tiny-primary">Refund</a>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                <% } %>
+
+            <% } %>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 3</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

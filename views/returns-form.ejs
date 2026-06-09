@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/returns" class="active">Refunds</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/reports/daily">Reports</a>
+                <a href="/users">Users</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="form-page">
+
+            <div class="form-header">
+                <div>
+                    <h1>Refund from <%= sale.reference %></h1>
+                    <p class="page-subtitle">
+                        Original sale: <%= formatDate(sale.created_at) %> by <%= sale.cashier_name %>
+                        &middot; Total <strong><%= formatRand(sale.total_cents) %></strong>
+                    </p>
+                </div>
+                <a href="/returns/new" class="form-back">← Find different sale</a>
+            </div>
+
+            <% if (!anyRefundable) { %>
+
+                <div class="empty-state">
+                    <p>All items in this sale have already been refunded. Nothing more to refund.</p>
+                    <a href="/returns" class="btn-secondary">Back to refunds</a>
+                </div>
+
+            <% } else { %>
+
+                <form method="POST" action="/returns" id="refund-form" class="refund-form">
+
+                    <input type="hidden" name="original_sale_id" value="<%= sale.id %>" />
+                    <input type="hidden" name="items" id="items-json" value="[]" />
+
+                    <h2 class="section-heading">Items on this sale</h2>
+
+                    <div class="table-wrap">
+                        <table class="data-table refund-items-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="num">Sold</th>
+                                    <th class="num">Already refunded</th>
+                                    <th class="num">Available</th>
+                                    <th class="num">Unit price</th>
+                                    <th class="num">Refund qty</th>
+                                    <th class="num">Line refund</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% items.forEach(item => { %>
+                                    <tr class="<%= item.available_to_refund === 0 ? 'row-inactive' : '' %>"
+                                        data-sale-item-id="<%= item.id %>"
+                                        data-unit-price="<%= item.unit_price_cents %>"
+                                        data-available="<%= item.available_to_refund %>">
+                                        <td>
+                                            <div class="cell-name"><%= item.product_name %></div>
+                                            <div class="cell-meta"><%= item.product_sku %></div>
+                                        </td>
+                                        <td class="num"><%= item.quantity %></td>
+                                        <td class="num">
+                                            <% if (item.already_refunded > 0) { %>
+                                                <span class="amount-refund"><%= item.already_refunded %></span>
+                                            <% } else { %>
+                                                <span class="cell-meta">—</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="num"><strong><%= item.available_to_refund %></strong></td>
+                                        <td class="num"><%= formatRand(item.unit_price_cents) %></td>
+                                        <td class="num">
+                                            <% if (item.available_to_refund > 0) { %>
+                                                <input
+                                                    type="number"
+                                                    class="refund-qty-input"
+                                                    min="0"
+                                                    max="<%= item.available_to_refund %>"
+                                                    value="0"
+                                                    step="1"
+                                                />
+                                            <% } else { %>
+                                                <span class="cell-meta">—</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="num">
+                                            <span class="line-refund-amount">R 0.00</span>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ===== Totals box ===== -->
+                    <div class="refund-totals">
+                        <div class="totals-row">
+                            <span>Refund subtotal (excl VAT):</span>
+                            <span id="subtotal-display">R 0.00</span>
+                        </div>
+                        <div class="totals-row">
+                            <span>VAT to refund:</span>
+                            <span id="vat-display">R 0.00</span>
+                        </div>
+                        <div class="totals-row totals-row-grand">
+                            <span>Total to refund:</span>
+                            <span id="total-display" class="amount-refund">R 0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- ===== Reason + Note ===== -->
+                    <div class="form-grid">
+                        <label class="field">
+                            <span class="field-label">Reason</span>
+                            <select name="reason">
+                                <option value="">-- Select reason (optional) --</option>
+                                <option value="Wrong size">Wrong size</option>
+                                <option value="Damaged on opening">Damaged on opening</option>
+                                <option value="Faulty / not working">Faulty / not working</option>
+                                <option value="Customer changed mind">Customer changed mind</option>
+                                <option value="Wrong item rung up">Wrong item rung up</option>
+                                <option value="Expired / off">Expired / off</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span class="field-hint">Helps with audit trail.</span>
+                        </label>
+
+                        <label class="field">
+                            <span class="field-label">Note</span>
+                            <textarea
+                                name="note"
+                                rows="3"
+                                placeholder="Optional: any extra detail (e.g. who authorised, customer name)"
+                            ></textarea>
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="/returns" class="btn-secondary">Cancel</a>
+                        <button type="submit" class="btn-primary" id="submit-btn" disabled>
+                            Post refund
+                        </button>
+                    </div>
+
+                </form>
+
+            <% } %>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 3</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+
+    <!-- ===== Inline JavaScript ===== -->
+    <% if (anyRefundable) { %>
+    <script>
+        (function() {
+            "use strict";
+
+            const VAT_RATE = 15;   // SARS standard rate. Per-item rates come from server.
+
+            const form          = document.getElementById("refund-form");
+            const itemsJsonInput = document.getElementById("items-json");
+            const submitBtn     = document.getElementById("submit-btn");
+            const subtotalDisplay = document.getElementById("subtotal-display");
+            const vatDisplay    = document.getElementById("vat-display");
+            const totalDisplay  = document.getElementById("total-display");
+
+            const qtyInputs = document.querySelectorAll(".refund-qty-input");
+
+
+            // React to any change in any quantity input
+            qtyInputs.forEach(input => {
+                input.addEventListener("input", recalculate);
+            });
+
+
+            function recalculate() {
+                let totalCents = 0;
+                const lines = [];
+
+                qtyInputs.forEach(input => {
+                    const row = input.closest("tr");
+                    const saleItemId = parseInt(row.dataset.saleItemId, 10);
+                    const unitPrice  = parseInt(row.dataset.unitPrice, 10);
+                    const available  = parseInt(row.dataset.available, 10);
+                    let qty          = parseInt(input.value, 10) || 0;
+
+                    // Clamp to available
+                    if (qty < 0)         qty = 0;
+                    if (qty > available) qty = available;
+                    if (qty !== parseInt(input.value, 10)) {
+                        input.value = qty;
+                    }
+
+                    const lineTotal = unitPrice * qty;
+                    totalCents += lineTotal;
+
+                    // Update the line refund display
+                    row.querySelector(".line-refund-amount").textContent =
+                        qty > 0 ? formatRand(lineTotal) : "R 0.00";
+
+                    if (qty > 0) {
+                        lines.push({
+                            sale_item_id:      saleItemId,
+                            quantity_refunded: qty,
+                        });
+                    }
+                });
+
+                // VAT-inclusive math (the original prices were VAT-inclusive)
+                const vatCents = Math.round((totalCents * VAT_RATE) / (100 + VAT_RATE));
+                const subtotalCents = totalCents - vatCents;
+
+                subtotalDisplay.textContent = formatRand(subtotalCents);
+                vatDisplay.textContent      = formatRand(vatCents);
+                totalDisplay.textContent    = "-" + formatRand(totalCents);
+
+                // Update the hidden items field
+                itemsJsonInput.value = JSON.stringify(lines);
+
+                // Enable submit only if at least one line is being refunded
+                submitBtn.disabled = lines.length === 0;
+            }
+
+
+            function formatRand(cents) {
+                const rand = (cents / 100).toFixed(2);
+                return "R " + rand;
+            }
+
+
+            // Confirm before submit
+            form.addEventListener("submit", (e) => {
+                const totalText = totalDisplay.textContent;
+                if (!confirm(`Post refund of ${totalText}? This will return items to stock and cannot be undone.`)) {
+                    e.preventDefault();
+                }
+            });
+
+
+            // Initial state
+            recalculate();
+        })();
+    </script>
+    <% } %>
+
+</body>
+</html>

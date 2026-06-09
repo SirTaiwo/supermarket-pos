@@ -1947,3 +1947,89 @@ input:disabled {
     color: #94a3b8;
     cursor: not-allowed;
 }
+/* ===================================================
+   Refunds (Phase 3)
+   =================================================== */
+
+/* Negative money — used for refund amounts */
+.amount-refund {
+    color: #b91c1c;
+}
+
+/* "Refund" status pill */
+.status-pill.status-refund {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* Refund form table — minor adjustments */
+.refund-items-table input.refund-qty-input {
+    width: 80px;
+    text-align: right;
+    padding: 0.3rem 0.5rem;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+}
+
+.refund-items-table input.refund-qty-input:focus {
+    outline: none;
+    border-color: #0f766e;
+    box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.2);
+}
+
+.line-refund-amount {
+    font-weight: 600;
+    color: #b91c1c;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Refund-specific totals box (mirrors .grn-totals) */
+.refund-totals {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+}
+
+.refund-totals .totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.refund-totals .totals-row-grand {
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding-top: 0.65rem;
+    margin-top: 0.4rem;
+    border-top: 1px solid #fecaca;
+}
+
+/* Refund search form */
+.refund-search-form {
+    background: #ffffff;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.refund-search-form .form-actions {
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+/* btn-tiny-primary - emphasized small action button */
+.btn-tiny-primary {
+    background: #0f766e;
+    color: white;
+    border: 1px solid #0f766e;
+}
+
+.btn-tiny-primary:hover {
+    background: #0d6660;
+}

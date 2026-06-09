@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/returns" class="active">Refunds</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/reports/daily">Reports</a>
+                <a href="/users">Users</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="grn-detail-page">
+
+            <div class="form-header">
+                <div>
+                    <h1>
+                        <%= refund.reference %>
+                        <span class="status-pill status-refund">Refund</span>
+                    </h1>
+                    <p class="page-subtitle">
+                        Posted <%= formatDate(refund.created_at) %> by <%= refund.cashier_name %>
+                    </p>
+                </div>
+                <a href="/returns" class="form-back">← Back to refunds</a>
+            </div>
+
+            <!-- ===== Summary cards ===== -->
+            <div class="grn-summary-grid">
+
+                <div class="grn-summary-card">
+                    <div class="grn-summary-label">Original sale</div>
+                    <div class="grn-summary-value">
+                        <%= refund.original_sale_reference %>
+                    </div>
+                </div>
+
+                <div class="grn-summary-card">
+                    <div class="grn-summary-label">Reason</div>
+                    <div class="grn-summary-value">
+                        <% if (refund.reason) { %>
+                            <%= refund.reason %>
+                        <% } else { %>
+                            <span class="cell-meta">— not recorded —</span>
+                        <% } %>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== Note (if any) ===== -->
+            <% if (refund.note) { %>
+                <div class="form-side-notes">
+                    <strong>Note:</strong> <%= refund.note %>
+                </div>
+            <% } %>
+
+            <!-- ===== Refund line items ===== -->
+            <h2 class="section-heading">Items refunded</h2>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="num">Qty</th>
+                            <th class="num">Unit price</th>
+                            <th class="num">VAT %</th>
+                            <th class="num">Line VAT</th>
+                            <th class="num">Line total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% items.forEach(item => { %>
+                            <tr>
+                                <td>
+                                    <div class="cell-name"><%= item.product_name %></div>
+                                    <div class="cell-meta"><%= item.product_sku %></div>
+                                </td>
+                                <td class="num"><%= item.quantity_refunded %></td>
+                                <td class="num"><%= formatRand(item.unit_price_cents) %></td>
+                                <td class="num"><%= item.vat_rate_percent %>%</td>
+                                <td class="num"><%= formatRand(item.line_vat_cents) %></td>
+                                <td class="num">
+                                    <strong class="amount-refund">-<%= formatRand(item.line_total_cents) %></strong>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ===== Totals ===== -->
+            <div class="grn-totals">
+                <div class="totals-row">
+                    <span>Subtotal (excl VAT):</span>
+                    <span class="amount-refund">-<%= formatRand(refund.subtotal_cents) %></span>
+                </div>
+                <div class="totals-row">
+                    <span>VAT refunded:</span>
+                    <span class="amount-refund">-<%= formatRand(refund.vat_cents) %></span>
+                </div>
+                <div class="totals-row totals-row-grand">
+                    <span>Total refunded (cash out):</span>
+                    <span class="amount-refund">-<%= formatRand(refund.total_cents) %></span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 3</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

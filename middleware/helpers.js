@@ -168,6 +168,41 @@ function generateGrnReference(db) {
     return `${prefix}${seq}`;
 }
 
+// =====================================================
+// generateRefundReference
+// =====================================================
+// Produces references like REF-20260608-001
+// Sequential within the day, same pattern as GRN.
+// =====================================================
+function generateRefundReference(db) {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const datePart = `${yyyy}${mm}${dd}`;
+    const prefix = `REF-${datePart}-`;
+
+    // Find the highest existing reference for today
+    const row = db.prepare(`
+        SELECT reference
+        FROM refunds
+        WHERE reference LIKE ?
+        ORDER BY reference DESC
+        LIMIT 1
+    `).get(prefix + "%");
+
+    let nextNumber = 1;
+    if (row) {
+        // Extract the sequence number from the existing reference
+        const parts = row.reference.split("-");
+        const lastNum = parseInt(parts[parts.length - 1], 10);
+        nextNumber = lastNum + 1;
+    }
+
+    const seq = String(nextNumber).padStart(3, "0");
+    return `${prefix}${seq}`;
+}
+
 
 // -----------------------------------------------------
 // Export everything
@@ -179,4 +214,5 @@ module.exports = {
     calculateLineVat,
     generateSaleReference,
     generateGrnReference,
+    generateRefundReference,
 };

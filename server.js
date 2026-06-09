@@ -110,6 +110,8 @@ app.use("/", require("./routes/stock-adjustments"));
 app.use("/", require("./routes/stock-movements"));
 // User management (manager only) - Phase 2
 app.use("/", require("./routes/users"));
+// Returns and refunds (cashier or manager) - Phase 3
+app.use("/", require("./routes/returns"));
 
 // =====================================================
 // 404 HANDLER
