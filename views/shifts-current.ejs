@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/returns">Refunds</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/shifts/current" class="active">Shifts</a>
+                <a href="/reports/daily">Reports</a>
+                <a href="/users">Users</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <% if (!shift) { %>
+
+            <!-- ===== NO open shift ===== -->
+            <div class="page-header">
+                <div>
+                    <h1>My shift</h1>
+                    <p class="page-subtitle">You don't have an open shift right now.</p>
+                </div>
+                <% if (currentUser.role === 'manager') { %>
+                    <a href="/shifts" class="btn-secondary">All shifts →</a>
+                <% } %>
+            </div>
+
+            <div class="empty-state">
+                <p>
+                    To start trading at the till, open a shift with your opening
+                    cash float. Every sale and refund will be tracked under your
+                    shift and reconciled when you close at the end of the day.
+                </p>
+                <a href="/shifts/new" class="btn-primary">Open shift</a>
+            </div>
+
+        <% } else { %>
+
+            <!-- ===== Has open shift ===== -->
+            <div class="page-header">
+                <div>
+                    <h1>
+                        Shift <%= shift.reference %>
+                        <span class="status-pill status-active">Open</span>
+                    </h1>
+                    <p class="page-subtitle">
+                        Opened <%= formatDate(shift.opened_at) %>
+                        &middot; Opening float <strong><%= formatRand(shift.opening_float_cents) %></strong>
+                    </p>
+                </div>
+                <a href="/shifts/<%= shift.id %>/close" class="btn-primary">Close shift</a>
+            </div>
+
+            <!-- ===== Activity summary cards ===== -->
+            <h2 class="section-heading">Activity this shift</h2>
+
+            <div class="summary-stat-grid">
+
+                <div class="stat-card stat-card-positive">
+                    <div class="stat-card-label">Cash sales</div>
+                    <div class="stat-card-value"><%= formatRand(activity.sales_cash.total_cents) %></div>
+                    <div class="stat-card-meta"><%= activity.sales_cash.count %> sale<%= activity.sales_cash.count === 1 ? '' : 's' %></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-label">Other payment sales</div>
+                    <div class="stat-card-value"><%= formatRand(activity.sales_other.total_cents) %></div>
+                    <div class="stat-card-meta"><%= activity.sales_other.count %> sale<%= activity.sales_other.count === 1 ? '' : 's' %></div>
+                </div>
+
+                <div class="stat-card stat-card-neutral">
+                    <div class="stat-card-label">Refunds (cash out)</div>
+                    <div class="stat-card-value">
+                        <% if (activity.refunds.total_cents > 0) { %>
+                            <span class="amount-refund">-<%= formatRand(activity.refunds.total_cents) %></span>
+                        <% } else { %>
+                            R 0.00
+                        <% } %>
+                    </div>
+                    <div class="stat-card-meta"><%= activity.refunds.count %> refund<%= activity.refunds.count === 1 ? '' : 's' %></div>
+                </div>
+
+                <div class="stat-card stat-card-bold">
+                    <div class="stat-card-label">Expected in drawer</div>
+                    <div class="stat-card-value"><%= formatRand(expectedCashCents) %></div>
+                    <div class="stat-card-meta">opening + cash sales − refunds</div>
+                </div>
+
+            </div>
+
+            <!-- ===== Helper note ===== -->
+            <div class="form-side-notes">
+                <p>
+                    <strong>Note:</strong> "Expected in drawer" is what the till SHOULD hold
+                    in physical cash right now. At end of shift, count your cash and the
+                    system will calculate any variance.
+                </p>
+            </div>
+
+            <!-- ===== Quick actions ===== -->
+            <div class="form-actions">
+                <a href="/pos" class="btn-secondary">Go to till →</a>
+                <a href="/shifts/<%= shift.id %>/close" class="btn-primary">Close shift</a>
+            </div>
+
+        <% } %>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 3</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

@@ -112,6 +112,8 @@ app.use("/", require("./routes/stock-movements"));
 app.use("/", require("./routes/users"));
 // Returns and refunds (cashier or manager) - Phase 3
 app.use("/", require("./routes/returns"));
+// Shifts and till management - Phase 3
+app.use("/", require("./routes/shifts"));
 
 // =====================================================
 // 404 HANDLER

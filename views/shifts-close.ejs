@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/returns">Refunds</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/shifts/current" class="active">Shifts</a>
+                <a href="/reports/daily">Reports</a>
+                <a href="/users">Users</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="form-page">
+
+            <div class="form-header">
+                <div>
+                    <h1>Close shift <%= shift.reference %></h1>
+                    <p class="page-subtitle">
+                        Opened <%= formatDate(shift.opened_at) %>
+                        &middot; Cashier: <%= shift.cashier_name %>
+                    </p>
+                </div>
+                <a href="/shifts/current" class="form-back">← Cancel</a>
+            </div>
+
+            <!-- ===== Activity summary ===== -->
+            <h2 class="section-heading">Shift summary</h2>
+
+            <div class="summary-stat-grid">
+
+                <div class="stat-card">
+                    <div class="stat-card-label">Opening float</div>
+                    <div class="stat-card-value"><%= formatRand(shift.opening_float_cents) %></div>
+                    <div class="stat-card-meta">starting cash</div>
+                </div>
+
+                <div class="stat-card stat-card-positive">
+                    <div class="stat-card-label">Cash sales</div>
+                    <div class="stat-card-value">+<%= formatRand(activity.sales_cash.total_cents) %></div>
+                    <div class="stat-card-meta"><%= activity.sales_cash.count %> sale<%= activity.sales_cash.count === 1 ? '' : 's' %></div>
+                </div>
+
+                <div class="stat-card stat-card-negative">
+                    <div class="stat-card-label">Refunds paid out</div>
+                    <div class="stat-card-value">
+                        <% if (activity.refunds.total_cents > 0) { %>
+                            -<%= formatRand(activity.refunds.total_cents) %>
+                        <% } else { %>
+                            R 0.00
+                        <% } %>
+                    </div>
+                    <div class="stat-card-meta"><%= activity.refunds.count %> refund<%= activity.refunds.count === 1 ? '' : 's' %></div>
+                </div>
+
+                <div class="stat-card stat-card-bold">
+                    <div class="stat-card-label">Expected in drawer</div>
+                    <div class="stat-card-value"><%= formatRand(expectedCashCents) %></div>
+                    <div class="stat-card-meta">opening + cash − refunds</div>
+                </div>
+
+            </div>
+
+            <!-- ===== Counted cash form ===== -->
+            <h2 class="section-heading">Count the drawer</h2>
+
+            <form method="POST" action="/shifts/<%= shift.id %>/close" class="product-form" id="close-form">
+
+                <div class="form-grid">
+
+                    <label class="field">
+                        <span class="field-label">Counted cash (Rand) <span class="req">*</span></span>
+                        <input
+                            type="number"
+                            name="counted_cash"
+                            id="counted-cash"
+                            required
+                            min="0"
+                            step="0.01"
+                            placeholder="e.g. 1820.00"
+                            data-expected-cents="<%= expectedCashCents %>"
+                            autofocus
+                        />
+                        <span class="field-hint">Total physical cash in the till right now.</span>
+                    </label>
+
+                    <div class="field">
+                        <span class="field-label">Variance</span>
+                        <div class="variance-display" id="variance-display">
+                            <span class="variance-empty">Enter counted cash to see variance</span>
+                        </div>
+                    </div>
+
+                    <label class="field field-full" id="reason-field" style="display:none;">
+                        <span class="field-label">Reason for variance <span class="req">*</span></span>
+                        <select name="variance_reason">
+                            <option value="">-- Select reason --</option>
+                            <option value="Change given incorrectly">Change given incorrectly</option>
+                            <option value="Cash dropped / lost">Cash dropped / lost</option>
+                            <option value="Customer overpaid (kept change)">Customer overpaid (kept change)</option>
+                            <option value="Counting error">Counting error</option>
+                            <option value="Petty cash spent">Petty cash spent</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span class="field-hint">Required when variance is not zero.</span>
+                    </label>
+
+                    <label class="field field-full">
+                        <span class="field-label">Closing note</span>
+                        <textarea
+                            name="closing_note"
+                            rows="3"
+                            placeholder="Optional: any extra context about the shift"
+                        ></textarea>
+                    </label>
+
+                </div>
+
+                <div class="form-actions">
+                    <a href="/shifts/current" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary" id="submit-btn" disabled>
+                        Close shift
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 3</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+
+    <!-- ===== Inline JavaScript for live variance ===== -->
+    <script>
+        (function() {
+            "use strict";
+
+            const countedInput   = document.getElementById("counted-cash");
+            const varianceDisplay = document.getElementById("variance-display");
+            const reasonField    = document.getElementById("reason-field");
+            const submitBtn      = document.getElementById("submit-btn");
+            const expectedCents  = parseInt(countedInput.dataset.expectedCents, 10);
+
+            countedInput.addEventListener("input", updateVariance);
+
+            function updateVariance() {
+                const countedRand = parseFloat(countedInput.value);
+                if (isNaN(countedRand)) {
+                    varianceDisplay.innerHTML = '<span class="variance-empty">Enter counted cash to see variance</span>';
+                    submitBtn.disabled = true;
+                    reasonField.style.display = "none";
+                    return;
+                }
+
+                const countedCents  = Math.round(countedRand * 100);
+                const varianceCents = countedCents - expectedCents;
+
+                let html;
+                if (varianceCents === 0) {
+                    html = `<span class="variance-balanced">✓ Balanced exactly</span>`;
+                    reasonField.style.display = "none";
+                } else if (varianceCents > 0) {
+                    html = `<span class="variance-over">+${formatRand(varianceCents)} over</span>`;
+                    reasonField.style.display = "block";
+                } else {
+                    html = `<span class="variance-short">-${formatRand(Math.abs(varianceCents))} short</span>`;
+                    reasonField.style.display = "block";
+                }
+                varianceDisplay.innerHTML = html;
+
+                submitBtn.disabled = false;
+            }
+
+            function formatRand(cents) {
+                const rand = (cents / 100).toFixed(2);
+                return "R " + rand;
+            }
+
+            // Confirm before submit
+            document.getElementById("close-form").addEventListener("submit", (e) => {
+                if (!confirm("Close shift now? This action cannot be undone.")) {
+                    e.preventDefault();
+                }
+            });
+        })();
+    </script>
+
+</body>
+</html>

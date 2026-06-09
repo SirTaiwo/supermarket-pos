@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/returns">Refunds</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/shifts/current" class="active">Shifts</a>
+                <a href="/reports/daily">Reports</a>
+                <a href="/users">Users</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="grn-detail-page">
+
+            <div class="form-header">
+                <div>
+                    <h1>
+                        <%= shift.reference %>
+                        <% if (shift.status === 'open') { %>
+                            <span class="status-pill status-active">Open</span>
+                        <% } else { %>
+                            <span class="status-pill status-closed">Closed</span>
+                        <% } %>
+                    </h1>
+                    <p class="page-subtitle">
+                        Cashier: <%= shift.cashier_name %>
+                        &middot; Opened <%= formatDate(shift.opened_at) %>
+                        <% if (shift.closed_at) { %>
+                            &middot; Closed <%= formatDate(shift.closed_at) %>
+                        <% } %>
+                    </p>
+                </div>
+                <div class="detail-actions">
+                    <% if (currentUser.role === 'manager') { %>
+                        <a href="/shifts" class="form-back">← All shifts</a>
+                    <% } else { %>
+                        <a href="/shifts/current" class="form-back">← My shift</a>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- ===== Top stat cards ===== -->
+            <div class="summary-stat-grid">
+
+                <div class="stat-card">
+                    <div class="stat-card-label">Opening float</div>
+                    <div class="stat-card-value"><%= formatRand(shift.opening_float_cents) %></div>
+                    <div class="stat-card-meta">starting cash</div>
+                </div>
+
+                <div class="stat-card stat-card-positive">
+                    <div class="stat-card-label">Cash sales</div>
+                    <div class="stat-card-value">+<%= formatRand(activity.sales_cash.total_cents) %></div>
+                    <div class="stat-card-meta"><%= activity.sales_cash.count %> sale<%= activity.sales_cash.count === 1 ? '' : 's' %></div>
+                </div>
+
+                <div class="stat-card stat-card-negative">
+                    <div class="stat-card-label">Refunds out</div>
+                    <div class="stat-card-value">
+                        <% if (activity.refunds.total_cents > 0) { %>
+                            -<%= formatRand(activity.refunds.total_cents) %>
+                        <% } else { %>
+                            R 0.00
+                        <% } %>
+                    </div>
+                    <div class="stat-card-meta"><%= activity.refunds.count %> refund<%= activity.refunds.count === 1 ? '' : 's' %></div>
+                </div>
+
+                <div class="stat-card stat-card-bold">
+                    <div class="stat-card-label">Expected cash</div>
+                    <div class="stat-card-value"><%= formatRand(expectedCashCents) %></div>
+                    <div class="stat-card-meta">opening + cash − refunds</div>
+                </div>
+
+            </div>
+
+            <!-- ===== Closing reconciliation (only for closed shifts) ===== -->
+            <% if (shift.status === 'closed') { %>
+
+                <h2 class="section-heading">Closing reconciliation</h2>
+
+                <div class="summary-stat-grid">
+
+                    <div class="stat-card">
+                        <div class="stat-card-label">Expected</div>
+                        <div class="stat-card-value"><%= formatRand(shift.expected_cash_cents) %></div>
+                        <div class="stat-card-meta">per system</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-label">Counted</div>
+                        <div class="stat-card-value"><%= formatRand(shift.counted_cash_cents) %></div>
+                        <div class="stat-card-meta">physical cash</div>
+                    </div>
+
+                    <div class="stat-card stat-card-bold">
+                        <div class="stat-card-label">Variance</div>
+                        <div class="stat-card-value">
+                            <% if (shift.variance_cents === 0) { %>
+                                <span class="variance-balanced">✓ Balanced</span>
+                            <% } else if (shift.variance_cents > 0) { %>
+                                <span class="variance-over">+<%= formatRand(shift.variance_cents) %></span>
+                            <% } else { %>
+                                <span class="variance-short">-<%= formatRand(Math.abs(shift.variance_cents)) %></span>
+                            <% } %>
+                        </div>
+                        <div class="stat-card-meta">counted - expected</div>
+                    </div>
+
+                </div>
+
+                <% if (shift.variance_reason) { %>
+                    <div class="form-side-notes">
+                        <strong>Reason:</strong> <%= shift.variance_reason %>
+                    </div>
+                <% } %>
+
+                <% if (shift.closing_note) { %>
+                    <div class="form-side-notes">
+                        <strong>Closing note:</strong> <%= shift.closing_note %>
+                    </div>
+                <% } %>
+
+            <% } %>
+
+            <!-- ===== Sales attached to this shift ===== -->
+            <% if (sales.length > 0) { %>
+
+                <h2 class="section-heading">Sales (<%= sales.length %>)</h2>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>When</th>
+                                <th>Payment</th>
+                                <th class="num">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% sales.forEach(s => { %>
+                                <tr>
+                                    <td><div class="cell-meta cell-meta-mono"><%= s.reference %></div></td>
+                                    <td><%= formatDate(s.created_at) %></td>
+                                    <td>
+                                        <span class="role-pill role-cashier"><%= s.payment_method %></span>
+                                    </td>
+                                    <td class="num"><strong><%= formatRand(s.total_cents) %></strong></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+            <% } %>
+
+            <!-- ===== Refunds attached to this shift ===== -->
+            <% if (refunds.length > 0) { %>
+
+                <h2 class="section-heading">Refunds (<%= refunds.length %>)</h2>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>When</th>
+                                <th>Reason</th>
+                                <th class="num">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% refunds.forEach(r => { %>
+                                <tr>
+                                    <td><div class="cell-meta cell-meta-mono"><%= r.reference %></div></td>
+                                    <td><%= formatDate(r.created_at) %></td>
+                                    <td><div class="cell-meta"><%= r.reason || '—' %></div></td>
+                                    <td class="num"><strong class="amount-refund">-<%= formatRand(r.total_cents) %></strong></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+            <% } %>
+
+            <!-- ===== Close shift button if still open ===== -->
+            <% if (shift.status === 'open' && (shift.cashier_id === currentUser.id || currentUser.role === 'manager')) { %>
+                <div class="form-actions">
+                    <a href="/shifts/<%= shift.id %>/close" class="btn-primary">Close shift</a>
+                </div>
+            <% } %>
+
+        </div>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 3</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>

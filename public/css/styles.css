@@ -2033,3 +2033,49 @@ input:disabled {
 .btn-tiny-primary:hover {
     background: #0d6660;
 }
+/* ===================================================
+   Shifts (Phase 3)
+   =================================================== */
+
+/* Variance display states */
+.variance-display {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.65rem 0.9rem;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.variance-empty {
+    color: #94a3b8;
+    font-style: italic;
+    font-weight: normal;
+    font-size: 0.92rem;
+}
+
+.variance-balanced {
+    color: #15803d;
+    font-weight: 600;
+}
+
+.variance-over {
+    color: #ca8a04;
+    font-weight: 600;
+}
+
+.variance-short {
+    color: #b91c1c;
+    font-weight: 600;
+}
+
+/* Closed shift pill */
+.status-pill.status-closed {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}

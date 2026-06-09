@@ -203,6 +203,62 @@ function generateRefundReference(db) {
     return `${prefix}${seq}`;
 }
 
+// =====================================================
+// generateShiftReference
+// =====================================================
+// Produces references like SHF-20260609-001
+// Sequential within the day, same pattern as GRN/ADJ/REF.
+// =====================================================
+function generateShiftReference(db) {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const datePart = `${yyyy}${mm}${dd}`;
+    const prefix = `SHF-${datePart}-`;
+
+    const row = db.prepare(`
+        SELECT reference
+        FROM shifts
+        WHERE reference LIKE ?
+        ORDER BY reference DESC
+        LIMIT 1
+    `).get(prefix + "%");
+
+    let nextNumber = 1;
+    if (row) {
+        const parts = row.reference.split("-");
+        const lastNum = parseInt(parts[parts.length - 1], 10);
+        nextNumber = lastNum + 1;
+    }
+
+    const seq = String(nextNumber).padStart(3, "0");
+    return `${prefix}${seq}`;
+}
+
+
+// =====================================================
+// getCurrentShift(db, userId)
+// =====================================================
+// Returns the user's currently OPEN shift, or null.
+// Used everywhere we need to gate till activity by
+// shift status (sales, refunds).
+// =====================================================
+function getCurrentShift(db, userId) {
+    return db.prepare(`
+        SELECT
+            id,
+            reference,
+            cashier_id,
+            opening_float_cents,
+            opened_at,
+            status
+        FROM shifts
+        WHERE cashier_id = ? AND status = 'open'
+        LIMIT 1
+    `).get(userId) || null;
+}
+
 
 // -----------------------------------------------------
 // Export everything
@@ -215,4 +271,6 @@ module.exports = {
     generateSaleReference,
     generateGrnReference,
     generateRefundReference,
+    generateShiftReference,
+    getCurrentShift
 };

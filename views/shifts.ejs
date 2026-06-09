@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar ========== -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/returns">Refunds</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/shifts" class="active">Shifts</a>
+                <a href="/reports/daily">Reports</a>
+                <a href="/users">Users</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="flash flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="flash flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="page">
+
+        <div class="page-header">
+            <div>
+                <h1>Shifts</h1>
+                <p class="page-subtitle">
+                    <% if (shifts.length === 0) { %>
+                        No shifts recorded yet
+                    <% } else { %>
+                        <%= shifts.length %> shift<%= shifts.length === 1 ? '' : 's' %> recorded
+                    <% } %>
+                </p>
+            </div>
+            <a href="/shifts/current" class="btn-secondary">My current shift →</a>
+        </div>
+
+        <% if (shifts.length === 0) { %>
+
+            <div class="empty-state">
+                <p>
+                    No shifts have been opened yet. Cashiers open shifts to start
+                    trading and close them at end of day to reconcile the till.
+                </p>
+                <a href="/shifts/new" class="btn-primary">Open my shift</a>
+            </div>
+
+        <% } else { %>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Cashier</th>
+                            <th>Opened</th>
+                            <th>Closed</th>
+                            <th>Status</th>
+                            <th class="num">Float</th>
+                            <th class="num">Sales</th>
+                            <th class="num">Refunds</th>
+                            <th class="num">Variance</th>
+                            <th class="actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% shifts.forEach(s => { %>
+                            <tr>
+                                <td><div class="cell-name"><%= s.reference %></div></td>
+                                <td><div class="cell-meta"><%= s.cashier_name %></div></td>
+                                <td><div class="cell-meta"><%= formatDate(s.opened_at) %></div></td>
+                                <td>
+                                    <% if (s.closed_at) { %>
+                                        <div class="cell-meta"><%= formatDate(s.closed_at) %></div>
+                                    <% } else { %>
+                                        <span class="cell-meta">—</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (s.status === 'open') { %>
+                                        <span class="status-pill status-active">Open</span>
+                                    <% } else { %>
+                                        <span class="status-pill status-closed">Closed</span>
+                                    <% } %>
+                                </td>
+                                <td class="num"><%= formatRand(s.opening_float_cents) %></td>
+                                <td class="num">
+                                    <%= formatRand(s.sales_total_cents) %>
+                                    <div class="cell-meta"><%= s.sales_count %> sale<%= s.sales_count === 1 ? '' : 's' %></div>
+                                </td>
+                                <td class="num">
+                                    <% if (s.refund_total_cents > 0) { %>
+                                        <span class="amount-refund">-<%= formatRand(s.refund_total_cents) %></span>
+                                    <% } else { %>
+                                        R 0.00
+                                    <% } %>
+                                    <div class="cell-meta"><%= s.refund_count %> refund<%= s.refund_count === 1 ? '' : 's' %></div>
+                                </td>
+                                <td class="num">
+                                    <% if (s.status === 'closed' && s.variance_cents !== null) { %>
+                                        <% if (s.variance_cents === 0) { %>
+                                            <span class="variance-balanced">✓ R 0.00</span>
+                                        <% } else if (s.variance_cents > 0) { %>
+                                            <span class="variance-over">+<%= formatRand(s.variance_cents) %></span>
+                                        <% } else { %>
+                                            <span class="variance-short">-<%= formatRand(Math.abs(s.variance_cents)) %></span>
+                                        <% } %>
+                                    <% } else { %>
+                                        <span class="cell-meta">—</span>
+                                    <% } %>
+                                </td>
+                                <td class="actions-col">
+                                    <a href="/shifts/<%= s.id %>" class="btn-tiny">View</a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+        <% } %>
+
+    </main>
+
+    <footer class="sitefoot">
+        <span>Supermarket POS &middot; Phase 3</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>
