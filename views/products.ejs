@@ -87,13 +87,16 @@
                                 <td class="num"><%= p.price_display %></td>
                                 <td class="num <%= p.stock_low ? 'stock-low' : '' %>">
                                     <%= p.stock_qty %>
-                                </td>
-                                <td>
-                                    <% if (p.is_active) { %>
-                                        <span class="status-pill status-active">Active</span>
-                                    <% } else { %>
-                                        <span class="status-pill status-inactive">Inactive</span>
-                                    <% } %>
+                    </td>
+                               <td>
+     <% if (p.stock_qty > 0) { %>
+              <form method="POST" action="/shop/cart/add" class="shop-product-add-form">
+                            <input type="hidden" name="product_id" value="<%= p.id %>" />
+                            <button type="submit" class="shop-btn-primary shop-add-btn">         Add to cart                  </button>
+                        </form>
+                    <% } else { %>
+                   <button class="shop-btn-secondary shop-add-btn" disabled>Out of stock</button>
+                    <% } %>
                                 </td>
                                 <td class="actions-col">
                                     <a href="/products/<%= p.id %>/edit" class="btn-tiny">Edit</a>
@@ -106,7 +109,7 @@
 </form>
                                 </td>
                             </tr>
-                        <% }) %>
+    <% }) %>
                     </tbody>
                 </table>
             </div>

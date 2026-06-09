@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; <%= shop.name %></title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="shop-body">
+
+    <!-- ========== Customer-facing top bar ========== -->
+    <header class="shop-topbar">
+        <div class="shop-topbar-inner">
+            <a href="/shop" class="shop-brand">
+                <span class="shop-brand-name"><%= shop.name %></span>
+                <% if (shop.tagline) { %>
+                    <span class="shop-brand-tagline"><%= shop.tagline %></span>
+                <% } %>
+            </a>
+            <nav class="shop-topnav">
+                <a href="/shop">Home</a>
+                <a href="/shop/products">All products</a>
+                <a href="/shop/cart" class="shop-cart-link active">
+                    🛒 Cart<% if (cartCount > 0) { %> (<%= cartCount %>)<% } %>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ========== Flash ========== -->
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="shop-flash shop-flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="shop-page">
+
+        <div class="shop-page-header">
+            <div>
+                <h1 class="shop-page-title">Checkout</h1>
+                <p class="shop-page-subtitle">
+                    Confirm your order and provide your contact details.
+                </p>
+            </div>
+            <a href="/shop/cart" class="shop-btn-secondary">← Back to cart</a>
+        </div>
+
+        <div class="checkout-layout">
+
+            <!-- ===== Customer details form ===== -->
+            <form method="POST" action="/shop/orders" class="checkout-form">
+
+                <h2 class="checkout-section-title">Your details</h2>
+
+                <label class="checkout-field">
+                    <span class="checkout-label">Full name <span class="req">*</span></span>
+                    <input
+                        type="text"
+                        name="customer_name"
+                        required
+                        maxlength="100"
+                        placeholder="e.g. Thando Khumalo"
+                        autofocus
+                    />
+                </label>
+
+                <label class="checkout-field">
+                    <span class="checkout-label">Phone number <span class="req">*</span></span>
+                    <input
+                        type="tel"
+                        name="customer_phone"
+                        required
+                        placeholder="e.g. +27 82 555 1234"
+                    />
+                    <span class="checkout-hint">We'll use this if we need to contact you about your order.</span>
+                </label>
+
+                <label class="checkout-field">
+                    <span class="checkout-label">Note (optional)</span>
+                    <textarea
+                        name="customer_note"
+                        rows="3"
+                        maxlength="500"
+                        placeholder="e.g. Will collect on Saturday morning"
+                    ></textarea>
+                </label>
+
+                <h2 class="checkout-section-title">Pickup &amp; payment</h2>
+                <div class="checkout-info-box">
+                    <p>
+                        <strong>Collection at the shop.</strong>
+                        After placing your order, bring the order reference to
+                        the till. Pay with cash, card, or mobile when collecting.
+                    </p>
+                    <p>
+                     <strong>Where to find us:</strong>
+                        <% shop.address_lines.forEach((line, i) => { %>
+                            <%= line %><% if (i < shop.address_lines.length - 1) { %>, <% } %>
+                        <% }) %>
+                        <% if (shop.phone) { %>
+                            &middot; Phone: <%= shop.phone %>
+                        <% } %>
+                    </p>
+                </div>
+
+                <div class="checkout-actions">
+                    <a href="/shop/cart" class="shop-btn-secondary">← Back to cart</a>
+                    <button type="submit" class="shop-btn-primary checkout-place-btn">
+                        Place pickup order
+                    </button>
+                </div>
+
+            </form>
+
+            <!-- ===== Order summary ===== -->
+            <aside class="checkout-summary">
+                <h2 class="checkout-summary-title">Order summary</h2>
+
+                <ul class="checkout-items">
+                    <% cart.lines.forEach(line => { %>
+                        <li class="checkout-item">
+                            <div class="checkout-item-info">
+                                <div class="checkout-item-name"><%= line.name %></div>
+                                <div class="checkout-item-meta">
+                                    <%= line.quantity %> &times; <%= formatRand(line.unit_price_cents) %>
+                                </div>
+                            </div>
+                            <div class="checkout-item-total"><%= formatRand(line.line_total_cents) %></div>
+                        </li>
+                    <% }) %>
+                </ul>
+
+                <div class="cart-summary-row">
+                    <span>Subtotal (excl. VAT):</span>
+                    <span><%= formatRand(cart.subtotal_cents) %></span>
+                </div>
+                <div class="cart-summary-row">
+                    <span>VAT @ 15%:</span>
+                    <span><%= formatRand(cart.vat_cents) %></span>
+                </div>
+                <div class="cart-summary-row cart-summary-grand">
+                    <span>Total:</span>
+                    <span><%= formatRand(cart.total_cents) %></span>
+                </div>
+
+                <div class="cart-summary-note">
+                    You pay this amount at the till on collection.
+                </div>
+            </aside>
+
+        </div>
+
+    </main>
+
+    <footer class="shop-footer">
+        <div class="shop-footer-inner">
+            <span>&copy; 2026 <%= shop.name %></span>
+            <a href="/login" class="shop-staff-link">Staff login</a>
+        </div>
+    </footer>
+
+</body>
+</html>

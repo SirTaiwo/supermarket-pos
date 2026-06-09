@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; <%= shop.name %></title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="shop-body">
+
+    <!-- ========== Customer-facing top bar ========== -->
+    <header class="shop-topbar">
+        <div class="shop-topbar-inner">
+            <a href="/shop" class="shop-brand">
+                <span class="shop-brand-name"><%= shop.name %></span>
+                <% if (shop.tagline) { %>
+                    <span class="shop-brand-tagline"><%= shop.tagline %></span>
+                <% } %>
+            </a>
+            <nav class="shop-topnav">
+                <a href="/shop">Home</a>
+                <a href="/shop/products">All products</a>
+                <a href="/shop/cart" class="shop-cart-link">
+                    🛒 Cart<% if (cartCount > 0) { %> (<%= cartCount %>)<% } %>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ========== Main content ========== -->
+    <main class="shop-page">
+
+        <!-- ===== Hero confirmation ===== -->
+        <div class="order-confirm-hero">
+            <div class="order-confirm-icon">✓</div>
+            <h1 class="order-confirm-title">Order placed!</h1>
+            <p class="order-confirm-subtitle">
+                Thank you, <%= order.customer_name %>.
+                We've received your order and will have it ready for you.
+            </p>
+            <div class="order-confirm-reference">
+                <div class="order-reference-label">Show this reference at the till:</div>
+                <div class="order-reference-number"><%= order.reference %></div>
+            </div>
+        </div>
+
+        <!-- ===== Order details ===== -->
+        <div class="order-confirm-details">
+
+            <div class="order-confirm-meta">
+                <div>
+                    <strong>Status:</strong>
+                    <% if (order.status === 'pending') { %>
+                        <span class="status-pill status-active">Pending pickup</span>
+                    <% } else if (order.status === 'ready') { %>
+                        <span class="status-pill status-active">Ready for collection</span>
+                    <% } else if (order.status === 'collected') { %>
+                        <span class="status-pill status-closed">Collected</span>
+                    <% } else if (order.status === 'cancelled') { %>
+                        <span class="status-pill status-inactive">Cancelled</span>
+                    <% } %>
+                </div>
+                <div><strong>Placed:</strong> 24 hours ago</div>
+                <div><strong>Phone:</strong> <%= order.customer_phone %></div>
+                <% if (order.customer_note) { %>
+                    <div><strong>Your note:</strong> <%= order.customer_note %></div>
+                <% } %>
+            </div>
+
+            <h2 class="checkout-section-title">Your items</h2>
+
+            <ul class="checkout-items">
+                <% items.forEach(item => { %>
+                    <li class="checkout-item">
+                        <div class="checkout-item-info">
+                            <div class="checkout-item-name"><%= item.product_name %></div>
+                            <div class="checkout-item-meta">
+                                <%= item.quantity %> &times; <%= formatRand(item.unit_price_cents) %>
+                            </div>
+                        </div>
+                        <div class="checkout-item-total"><%= formatRand(item.line_total_cents) %></div>
+                    </li>
+                <% }) %>
+            </ul>
+
+            <div class="cart-summary-row">
+                <span>Subtotal (excl. VAT):</span>
+                <span><%= formatRand(order.subtotal_cents) %></span>
+            </div>
+            <div class="cart-summary-row">
+                <span>VAT @ 15%:</span>
+                <span><%= formatRand(order.vat_cents) %></span>
+            </div>
+            <div class="cart-summary-row cart-summary-grand">
+                <span>Total to pay at collection:</span>
+                <span><%= formatRand(order.total_cents) %></span>
+            </div>
+
+        </div>
+
+        <!-- ===== Next steps ===== -->
+        <div class="order-confirm-next">
+            <h2 class="checkout-section-title">What's next?</h2>
+            <ol class="order-next-steps">
+                <li>
+                    <strong>Visit our shop</strong> at
+                    <% shop.address_lines.forEach((line, i) => { %>
+                        <%= line %><% if (i < shop.address_lines.length - 1) { %>, <% } %>
+                    <% }) %>.
+                </li>
+                <li>
+                    <strong>Show this reference</strong> at the till:
+                    <code class="order-next-ref"><%= order.reference %></code>
+                </li>
+                <li>
+                    <strong>Pay <%= formatRand(order.total_cents) %></strong> with cash, card, or mobile.
+                </li>
+                <li>
+                    <strong>Take your order home</strong> and enjoy!
+                </li>
+            </ol>
+
+            <% if (shop.phone) { %>
+                <p class="order-confirm-contact">
+                    Questions? Call us on <a href="tel:<%= shop.phone %>"><%= shop.phone %></a>.
+                </p>
+            <% } %>
+        </div>
+
+        <!-- ===== Quick actions ===== -->
+        <div class="order-confirm-actions">
+            <a href="/shop/products" class="shop-btn-primary">Browse more products</a>
+            <a href="/shop" class="shop-btn-secondary">Back to home</a>
+        </div>
+
+    </main>
+
+    <footer class="shop-footer">
+        <div class="shop-footer-inner">
+            <span>&copy; 2026 <%= shop.name %></span>
+            <a href="/login" class="shop-staff-link">Staff login</a>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -20,9 +20,9 @@
             <nav class="shop-topnav">
                 <a href="/shop" class="active">Home</a>
                 <a href="/shop/products">All products</a>
-                <a href="/shop/cart" class="shop-cart-link">
-                    🛒 Cart
-                </a>
+               <a href="/shop/cart" class="shop-cart-link">
+    🛒 Cart<% if (cartCount > 0) { %> (<%= cartCount %>)<% } %>
+</a>
             </nav>
         </div>
     </header>

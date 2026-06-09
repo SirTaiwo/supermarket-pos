@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; <%= shop.name %></title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="shop-body">
+
+    <!-- ========== Customer-facing top bar ========== -->
+    <header class="shop-topbar">
+        <div class="shop-topbar-inner">
+            <a href="/shop" class="shop-brand">
+                <span class="shop-brand-name"><%= shop.name %></span>
+                <% if (shop.tagline) { %>
+                    <span class="shop-brand-tagline"><%= shop.tagline %></span>
+                <% } %>
+            </a>
+            <nav class="shop-topnav">
+                <a href="/shop">Home</a>
+                <a href="/shop/products">All products</a>
+                <a href="/shop/cart" class="shop-cart-link active">
+                    🛒 Cart<% if (cartCount > 0) { %> (<%= cartCount %>)<% } %>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ========== Flash messages ========== -->
+    <% if (flashSuccess && flashSuccess.length > 0) { %>
+        <div class="shop-flash shop-flash-success"><%= flashSuccess[0] %></div>
+    <% } %>
+    <% if (flashError && flashError.length > 0) { %>
+        <div class="shop-flash shop-flash-error"><%= flashError[0] %></div>
+    <% } %>
+
+    <!-- ========== Main content ========== -->
+    <main class="shop-page">
+
+        <div class="shop-page-header">
+            <div>
+                <h1 class="shop-page-title">Your cart</h1>
+                <p class="shop-page-subtitle">
+                    <% if (cart.lines.length === 0) { %>
+                        Nothing here yet
+                    <% } else { %>
+                        <%= cart.total_items %> item<%= cart.total_items === 1 ? '' : 's' %> in your cart
+                    <% } %>
+                </p>
+            </div>
+        </div>
+
+        <!-- ===== Warnings ===== -->
+        <% if (cart.warnings.length > 0) { %>
+            <% cart.warnings.forEach(w => { %>
+                <div class="shop-warning">⚠ <%= w %></div>
+            <% }) %>
+        <% } %>
+
+        <!-- ===== Cart contents ===== -->
+        <% if (cart.lines.length === 0) { %>
+
+            <div class="shop-empty-state">
+                <p class="shop-empty">
+                    Your cart is empty. Browse our products to start shopping.
+                </p>
+                <a href="/shop/products" class="shop-btn-primary">Browse products</a>
+            </div>
+
+        <% } else { %>
+
+            <div class="cart-layout">
+
+                <!-- ===== Items list ===== -->
+                <div class="cart-items">
+                    <% cart.lines.forEach(line => { %>
+                        <div class="cart-line">
+                            <div class="cart-line-info">
+                                <div class="cart-line-name"><%= line.name %></div>
+                                <div class="cart-line-sku"><%= line.sku %></div>
+                                <div class="cart-line-price">
+                                    <%= formatRand(line.unit_price_cents) %> each
+                                    <span class="cart-line-vat">incl. VAT</span>
+                                </div>
+                            </div>
+
+                            <form method="POST" action="/shop/cart/update" class="cart-line-qty">
+                                <input type="hidden" name="product_id" value="<%= line.product_id %>" />
+                                <label class="cart-qty-label">Qty</label>
+                                <input
+                                    type="number"
+                                    name="quantity"
+                                    value="<%= line.quantity %>"
+                                    min="0"
+                                    max="<%= line.stock_qty %>"
+                                    class="cart-qty-input"
+                                />
+                                <button type="submit" class="cart-update-btn">Update</button>
+                            </form>
+
+                            <div class="cart-line-total">
+                                <%= formatRand(line.line_total_cents) %>
+                            </div>
+
+                            <form method="POST" action="/shop/cart/update" class="cart-line-remove">
+                                <input type="hidden" name="product_id" value="<%= line.product_id %>" />
+                                <input type="hidden" name="quantity" value="0" />
+                                <button type="submit" class="cart-remove-btn" title="Remove from cart"
+                                        onclick="return confirm('Remove <%= line.name %> from cart?')">
+                                    ✕
+                                </button>
+                            </form>
+                        </div>
+                    <% }) %>
+
+                    <div class="cart-actions">
+                        <form method="POST" action="/shop/cart/clear" style="display:inline;"
+                              onsubmit="return confirm('Clear the entire cart?')">
+                            <button type="submit" class="shop-btn-secondary">Clear cart</button>
+                        </form>
+                        <a href="/shop/products" class="shop-btn-secondary">Continue shopping →</a>
+                    </div>
+                </div>
+
+                <!-- ===== Summary box ===== -->
+                <aside class="cart-summary">
+                    <h2 class="cart-summary-title">Order summary</h2>
+
+                    <div class="cart-summary-row">
+                        <span>Subtotal (excl. VAT):</span>
+                        <span><%= formatRand(cart.subtotal_cents) %></span>
+                    </div>
+                    <div class="cart-summary-row">
+                        <span>VAT @ 15%:</span>
+                        <span><%= formatRand(cart.vat_cents) %></span>
+                    </div>
+                    <div class="cart-summary-row cart-summary-grand">
+                        <span>Total:</span>
+                        <span><%= formatRand(cart.total_cents) %></span>
+                    </div>
+
+                    <div class="cart-summary-note">
+                        You'll pay this amount at the till when you collect your order.
+                    </div>
+
+                   <a href="/shop/checkout" class="shop-btn-primary cart-checkout-btn">
+                        Proceed to checkout →
+                    </a>
+
+                    <a href="/shop/products" class="cart-summary-back">
+                        ← Continue shopping
+                    </a>
+                </aside>
+
+            </div>
+
+        <% } %>
+
+    </main>
+
+    <footer class="shop-footer">
+        <div class="shop-footer-inner">
+            <span>&copy; 2026 <%= shop.name %></span>
+            <a href="/login" class="shop-staff-link">Staff login</a>
+        </div>
+    </footer>
+
+</body>
+</html>

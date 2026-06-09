@@ -20,9 +20,9 @@
             <nav class="shop-topnav">
                 <a href="/shop">Home</a>
                 <a href="/shop/products" class="active">All products</a>
-                <a href="/shop/cart" class="shop-cart-link">
-                    🛒 Cart
-                </a>
+               <a href="/shop/cart" class="shop-cart-link">
+    🛒 Cart<% if (cartCount > 0) { %> (<%= cartCount %>)<% } %>
+</a>
             </nav>
         </div>
     </header>
@@ -111,7 +111,7 @@
                         <% if (p.stock_qty > 0) { %>
                             <form method="POST" action="/shop/cart/add" class="shop-product-add-form">
                                 <input type="hidden" name="product_id" value="<%= p.id %>" />
-                                <button type="submit" class="shop-btn-primary shop-add-btn" disabled title="Cart coming next session">
+                                <button type="submit" class="shop-btn-primary shop-add-btn">
                                     Add to cart
                                 </button>
                             </form>
