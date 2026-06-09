@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; <%= shop.name %></title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="shop-body">
+
+    <!-- ========== Customer-facing top bar ========== -->
+    <header class="shop-topbar">
+        <div class="shop-topbar-inner">
+            <a href="/shop" class="shop-brand">
+                <span class="shop-brand-name"><%= shop.name %></span>
+                <% if (shop.tagline) { %>
+                    <span class="shop-brand-tagline"><%= shop.tagline %></span>
+                <% } %>
+            </a>
+            <nav class="shop-topnav">
+                <a href="/shop" class="active">Home</a>
+                <a href="/shop/products">All products</a>
+                <a href="/shop/cart" class="shop-cart-link">
+                    🛒 Cart
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ========== Hero section ========== -->
+    <section class="shop-hero">
+        <div class="shop-hero-inner">
+            <h1 class="shop-hero-title">Welcome to <%= shop.name %></h1>
+            <% if (shop.tagline) { %>
+                <p class="shop-hero-tagline"><%= shop.tagline %></p>
+            <% } %>
+            <p class="shop-hero-intro">
+                Order online and collect at our shop. Browse our products,
+                add what you need to your cart, and pick up at your convenience.
+            </p>
+            <div class="shop-hero-cta">
+                <a href="/shop/products" class="shop-btn-primary">Browse all products →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== How it works ========== -->
+    <section class="shop-section">
+        <div class="shop-section-inner">
+            <h2 class="shop-section-title">How it works</h2>
+            <div class="shop-steps">
+                <div class="shop-step">
+                    <div class="shop-step-number">1</div>
+                    <h3 class="shop-step-title">Browse</h3>
+                    <p>Explore our catalogue of fresh and pantry items.</p>
+                </div>
+                <div class="shop-step">
+                    <div class="shop-step-number">2</div>
+                    <h3 class="shop-step-title">Order</h3>
+                    <p>Add items to your cart and place your pickup order.</p>
+                </div>
+                <div class="shop-step">
+                    <div class="shop-step-number">3</div>
+                    <h3 class="shop-step-title">Collect &amp; pay</h3>
+                    <p>Come to the shop, show your order, and pay at the till.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== Featured products ========== -->
+    <section class="shop-section shop-section-alt">
+        <div class="shop-section-inner">
+            <h2 class="shop-section-title">Featured today</h2>
+
+            <% if (featured.length === 0) { %>
+                <p class="shop-empty">
+                    No products available right now. Please check back later.
+                </p>
+            <% } else { %>
+                <div class="shop-product-grid">
+                    <% featured.forEach(p => { %>
+                        <a href="/shop/products" class="shop-product-card">
+                            <div class="shop-product-name"><%= p.name %></div>
+                            <div class="shop-product-sku"><%= p.sku %></div>
+                            <div class="shop-product-price"><%= formatRand(p.price_cents) %></div>
+                            <div class="shop-product-stock">
+                                <% if (p.stock_qty > 10) { %>
+                                    <span class="stock-pill stock-good">In stock</span>
+                                <% } else if (p.stock_qty > 0) { %>
+                                    <span class="stock-pill stock-low">Only <%= p.stock_qty %> left</span>
+                                <% } %>
+                            </div>
+                        </a>
+                    <% }) %>
+                </div>
+
+                <div class="shop-section-cta">
+                    <a href="/shop/products" class="shop-btn-secondary">See all products →</a>
+                </div>
+            <% } %>
+        </div>
+    </section>
+
+    <!-- ========== Shop info / footer ========== -->
+    <section class="shop-info">
+        <div class="shop-info-inner">
+            <h2 class="shop-section-title">Visit us</h2>
+            <div class="shop-info-grid">
+                <div class="shop-info-item">
+                    <div class="shop-info-label">Address</div>
+                    <% shop.address_lines.forEach(line => { %>
+                        <div><%= line %></div>
+                    <% }) %>
+                </div>
+                <% if (shop.phone) { %>
+                    <div class="shop-info-item">
+                        <div class="shop-info-label">Phone</div>
+                        <div><a href="tel:<%= shop.phone %>"><%= shop.phone %></a></div>
+                    </div>
+                <% } %>
+                <% if (shop.email) { %>
+                    <div class="shop-info-item">
+                        <div class="shop-info-label">Email</div>
+                        <div><a href="mailto:<%= shop.email %>"><%= shop.email %></a></div>
+                    </div>
+                <% } %>
+                <div class="shop-info-item">
+                    <div class="shop-info-label">VAT registered</div>
+                    <div><%= shop.vat_number %></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="shop-footer">
+        <div class="shop-footer-inner">
+            <span>&copy; 2026 <%= shop.name %></span>
+            <a href="/login" class="shop-staff-link">Staff login</a>
+        </div>
+    </footer>
+
+</body>
+</html>

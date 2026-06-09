@@ -81,8 +81,9 @@ app.use((req, res, next) => {
 
 // Home — redirects based on role
 app.get("/", (req, res) => {
+    // Anonymous visitors → public shop (the customer-facing storefront)
     if (!req.isAuthenticated()) {
-        return res.redirect("/login");
+        return res.redirect("/shop");
     }
     // Cashiers go to till, managers to reports dashboard
     if (req.user.role === "manager") {
@@ -114,6 +115,9 @@ app.use("/", require("./routes/users"));
 app.use("/", require("./routes/returns"));
 // Shifts and till management - Phase 3
 app.use("/", require("./routes/shifts"));
+// Public shop (no auth required) - Phase 4
+app.use("/", require("./routes/shop"));
+
 
 // =====================================================
 // 404 HANDLER

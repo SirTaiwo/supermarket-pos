@@ -236,6 +236,39 @@ function generateShiftReference(db) {
     return `${prefix}${seq}`;
 }
 
+// =====================================================
+// generateOrderReference
+// =====================================================
+// Produces references like ORD-20260609-001
+// Sequential within the day, same pattern as GRN/ADJ/REF/SHF.
+// =====================================================
+function generateOrderReference(db) {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const datePart = `${yyyy}${mm}${dd}`;
+    const prefix = `ORD-${datePart}-`;
+
+    const row = db.prepare(`
+        SELECT reference
+        FROM online_orders
+        WHERE reference LIKE ?
+        ORDER BY reference DESC
+        LIMIT 1
+    `).get(prefix + "%");
+
+    let nextNumber = 1;
+    if (row) {
+        const parts = row.reference.split("-");
+        const lastNum = parseInt(parts[parts.length - 1], 10);
+        nextNumber = lastNum + 1;
+    }
+
+    const seq = String(nextNumber).padStart(3, "0");
+    return `${prefix}${seq}`;
+}
+
 
 // =====================================================
 // getCurrentShift(db, userId)
@@ -272,5 +305,6 @@ module.exports = {
     generateGrnReference,
     generateRefundReference,
     generateShiftReference,
+    generateOrderReference,
     getCurrentShift
 };

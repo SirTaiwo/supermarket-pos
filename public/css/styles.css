@@ -2334,3 +2334,528 @@ input:disabled {
         color: #000000 !important;
     }
 }
+/* ===================================================
+   SHOP — Customer-facing styles (Phase 4)
+   ===================================================
+   Completely separate visual identity from staff
+   back-office. Warm, friendly, mobile-first.
+   =================================================== */
+
+/* The customer-facing body has its own background */
+.shop-body {
+    background: linear-gradient(180deg, #fafaf8 0%, #f5f5f0 100%);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+    color: #1f2937;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Shop top bar (different from staff topbar) */
+.shop-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e5e0;
+    padding: 1rem 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.shop-topbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.shop-brand {
+    text-decoration: none;
+    color: #0f172a;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.shop-brand-name {
+    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.shop-brand-tagline {
+    font-size: 0.78rem;
+    color: #78716c;
+    font-style: italic;
+}
+
+.shop-topnav {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.shop-topnav a {
+    text-decoration: none;
+    color: #44403c;
+    font-weight: 500;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    transition: all 0.15s;
+}
+
+.shop-topnav a:hover {
+    background: #f5f5f0;
+    color: #0f172a;
+}
+
+.shop-topnav a.active {
+    background: #1f2937;
+    color: #ffffff;
+}
+
+.shop-cart-link {
+    background: #f0f4ed !important;
+    color: #2d6a4f !important;
+    font-weight: 600 !important;
+}
+
+.shop-cart-link:hover {
+    background: #d6e4cf !important;
+}
+
+/* Hero section on the home page */
+.shop-hero {
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    color: #ffffff;
+    padding: 4rem 1.5rem;
+    text-align: center;
+}
+
+.shop-hero-inner {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.shop-hero-title {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 2.8rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.shop-hero-tagline {
+    font-style: italic;
+    color: #e7e5e4;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.shop-hero-intro {
+    font-size: 1.05rem;
+    color: #d6d3d1;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    line-height: 1.7;
+}
+
+.shop-hero-cta {
+    margin-top: 1rem;
+}
+
+/* Big primary button — shop style */
+.shop-btn-primary {
+    display: inline-block;
+    background: #2d6a4f;
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.15s;
+}
+
+.shop-btn-primary:hover {
+    background: #1b4332;
+}
+
+.shop-btn-primary:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.shop-btn-secondary {
+    display: inline-block;
+    background: #ffffff;
+    color: #44403c;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid #d6d3d1;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.15s;
+}
+
+.shop-btn-secondary:hover {
+    background: #f5f5f0;
+}
+
+/* Generic shop section */
+.shop-section {
+    padding: 3rem 1.5rem;
+}
+
+.shop-section-alt {
+    background: #ffffff;
+}
+
+.shop-section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.shop-section-title {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.8rem;
+    text-align: center;
+    margin: 0 0 2rem 0;
+    color: #0f172a;
+}
+
+.shop-section-cta {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* How it works steps */
+.shop-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    text-align: center;
+}
+
+.shop-step {
+    padding: 1rem;
+}
+
+.shop-step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #2d6a4f;
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.shop-step-title {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.3rem;
+    margin: 0 0 0.5rem 0;
+    color: #0f172a;
+}
+
+.shop-step p {
+    color: #57534e;
+    margin: 0;
+}
+
+/* Product grid (used on home + browse) */
+.shop-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+.shop-product-card {
+    background: #ffffff;
+    border: 1px solid #e5e5e0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: all 0.15s;
+}
+
+.shop-product-card:hover {
+    border-color: #2d6a4f;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+.shop-product-card-empty {
+    opacity: 0.5;
+}
+
+.shop-product-card-empty:hover {
+    transform: none;
+    border-color: #e5e5e0;
+    box-shadow: none;
+}
+
+.shop-product-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.3;
+}
+
+.shop-product-sku {
+    font-size: 0.78rem;
+    color: #a8a29e;
+    font-family: ui-monospace, "Cascadia Code", monospace;
+}
+
+.shop-product-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2d6a4f;
+    font-variant-numeric: tabular-nums;
+    margin-top: 0.25rem;
+}
+
+.shop-product-vat {
+    font-size: 0.7rem;
+    color: #a8a29e;
+    font-weight: 400;
+    margin-left: 0.3rem;
+}
+
+.shop-product-stock {
+    margin: 0.25rem 0;
+}
+
+.shop-product-add-form {
+    margin-top: auto;
+    padding-top: 0.5rem;
+}
+
+.shop-add-btn {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* Stock pills (customer-facing version, slightly larger) */
+.stock-pill {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.stock-good {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.stock-low {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.stock-out {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Generic shop page (browse, cart, checkout) */
+.shop-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+.shop-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.shop-page-title {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 2rem;
+    margin: 0 0 0.25rem 0;
+    color: #0f172a;
+}
+
+.shop-search-term {
+    font-style: italic;
+    color: #2d6a4f;
+}
+
+.shop-page-subtitle {
+    color: #78716c;
+    margin: 0;
+}
+
+/* Search form */
+.shop-search-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.shop-search-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d6d3d1;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #ffffff;
+}
+
+.shop-search-input:focus {
+    outline: none;
+    border-color: #2d6a4f;
+    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+}
+
+/* Empty states */
+.shop-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e5e0;
+}
+
+.shop-empty {
+    color: #78716c;
+    font-size: 1rem;
+    margin: 0 0 1.5rem 0;
+}
+
+/* Shop info section */
+.shop-info {
+    background: #1f2937;
+    color: #f5f5f0;
+    padding: 3rem 1.5rem;
+}
+
+.shop-info-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.shop-info .shop-section-title {
+    color: #f5f5f0;
+}
+
+.shop-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    text-align: center;
+}
+
+.shop-info-item {
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.shop-info-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #a8a29e;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.shop-info-item a {
+    color: #d6d3d1;
+    text-decoration: none;
+}
+
+.shop-info-item a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* Footer */
+.shop-footer {
+    background: #0f172a;
+    color: #a8a29e;
+    padding: 1.5rem;
+    font-size: 0.85rem;
+}
+
+.shop-footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.shop-staff-link {
+    color: #57534e;
+    text-decoration: none;
+    font-size: 0.78rem;
+}
+
+.shop-staff-link:hover {
+    color: #a8a29e;
+    text-decoration: underline;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .shop-topbar-inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .shop-topnav {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .shop-hero-title {
+        font-size: 2rem;
+    }
+
+    .shop-hero {
+        padding: 2.5rem 1rem;
+    }
+
+    .shop-steps {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .shop-product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .shop-product-card {
+        padding: 1rem;
+    }
+}
