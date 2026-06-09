@@ -2079,3 +2079,258 @@ input:disabled {
     color: #475569;
     border: 1px solid #cbd5e1;
 }
+/* ===================================================
+   Sales receipts (Phase 3 — Print-friendly)
+   =================================================== */
+
+/* The page background when viewing on screen */
+.receipt-page {
+    max-width: 800px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+}
+
+/* The receipt itself — looks like a piece of paper */
+.receipt {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 2.5rem 3rem;
+    font-family: ui-monospace, "Cascadia Code", "Source Code Pro", "Courier New", monospace;
+    font-size: 0.92rem;
+    color: #0f172a;
+    line-height: 1.45;
+}
+
+/* Action bar at top (Back + Print buttons) */
+.receipt-actions {
+    max-width: 800px;
+    margin: 1.5rem auto 0;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+/* Shop header */
+.receipt-header {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.receipt-shop-name {
+    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 0.2rem 0;
+    letter-spacing: 0.02em;
+    color: #0f172a;
+}
+
+.receipt-tagline {
+    font-style: italic;
+    color: #64748b;
+    margin-bottom: 0.6rem;
+    font-size: 0.85rem;
+}
+
+.receipt-shop-meta {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.5;
+}
+
+.receipt-vat {
+    margin-top: 0.4rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* Dividers */
+.receipt-divider {
+    color: #cbd5e1;
+    font-family: ui-monospace, monospace;
+    text-align: center;
+    margin: 0.8rem 0;
+    letter-spacing: -0.1em;
+    user-select: none;
+}
+
+/* Transaction meta */
+.receipt-meta-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.15rem 0;
+}
+
+.receipt-meta-row strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* Items table */
+.receipt-items {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.receipt-items th {
+    text-align: left;
+    padding: 0.4rem 0;
+    font-weight: 700;
+    color: #475569;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.receipt-items th.num,
+.receipt-items td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.receipt-items td {
+    padding: 0.4rem 0;
+    vertical-align: top;
+}
+
+.receipt-item-name {
+    padding-right: 0.5rem;
+}
+
+.receipt-item-sku {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin-top: 0.1rem;
+}
+
+.receipt-item-qty {
+    width: 50px;
+    padding: 0 0.5rem;
+}
+
+.receipt-item-price,
+.receipt-item-total {
+    width: 90px;
+    padding-left: 0.5rem;
+}
+
+/* Totals */
+.receipt-totals {
+    margin-top: 0.5rem;
+}
+
+.receipt-total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.2rem 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.receipt-total-grand {
+    font-size: 1.15rem;
+    font-weight: 700;
+    border-top: 2px solid #0f172a;
+    margin-top: 0.4rem;
+    padding-top: 0.5rem;
+    color: #0f172a;
+}
+
+.receipt-total-payment {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* Refunds notice */
+.receipt-refunds {
+    font-size: 0.85rem;
+    color: #b91c1c;
+}
+
+.receipt-refund-row {
+    margin-top: 0.3rem;
+    font-family: ui-monospace, monospace;
+}
+
+/* Footer */
+.receipt-footer {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.receipt-thank-you {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.4rem;
+}
+
+.receipt-returns-policy {
+    font-style: italic;
+    color: #64748b;
+}
+
+.receipt-registration {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+
+/* ===================================================
+   PRINT STYLES — Hide everything except the receipt
+   =================================================== */
+@media print {
+
+    /* Hide everything tagged as "no-print" */
+    .no-print {
+        display: none !important;
+    }
+
+    /* Reset page background and remove shadows */
+    body {
+        background: #ffffff !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .receipt-page {
+        margin: 0;
+        padding: 0;
+        max-width: none;
+    }
+
+    .receipt {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 1cm 1.5cm;
+        max-width: 100%;
+    }
+
+    /* Avoid page breaks in awkward places */
+    .receipt-items thead {
+        display: table-header-group;
+    }
+
+    .receipt-totals,
+    .receipt-footer {
+        page-break-inside: avoid;
+    }
+
+    /* Black text for print clarity */
+    /* Black text for print clarity */
+    .receipt,
+    .receipt-shop-name,
+    .receipt-total-grand,
+    .receipt-thank-you {
+        color: #000000 !important;
+    }
+}

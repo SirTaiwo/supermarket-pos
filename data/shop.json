@@ -1,0 +1,16 @@
+{
+    "name": "Rohani Supermarket",
+    "tagline": "Quality groceries, every day",
+    "address_lines": [
+        "123 Main Road",
+        "Observatory, Cape Town",
+        "7925"
+    ],
+    "phone": "+27 21 555 0100",
+    "email": "info@rohanisupermarket.co.za",
+    "website": "rohanisupermarket.co.za",
+    "vat_number": "4023456789",
+    "registration": "2024/123456/07",
+    "footer_thank_you": "Thank you for shopping with us",
+    "footer_returns_policy": "Returns accepted within 14 days with this receipt"
+}

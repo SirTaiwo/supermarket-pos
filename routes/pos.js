@@ -15,6 +15,7 @@
 const express = require("express");
 const db = require("../data/db");
 const helpers = require("../middleware/helpers");
+const { getCurrentShift } = require("../middleware/helpers");
 const { requireLogin } = require("../middleware/auth");
 
 const router = express.Router();
@@ -24,9 +25,21 @@ const router = express.Router();
 // GET /pos — Render the till
 // =====================================================
 router.get("/pos", requireLogin, (req, res) => {
+    // The till requires an open shift. Without one, redirect
+    // the cashier to open one first.
+    const shift = getCurrentShift(db, req.user.id);
+    if (!shift) {
+        req.flash(
+            "error",
+            "You need an open shift before using the till. Open one now."
+        );
+        return res.redirect("/shifts/new");
+    }
+
     res.render("pos", {
         title:  "Till",
         active: "pos",
+        shift:  shift,
     });
 });
 
@@ -128,6 +141,14 @@ router.get("/api/products/search", requireLogin, (req, res) => {
 router.post("/api/sales", requireLogin, (req, res) => {
     const { items, payment_method } = req.body;
 
+    // ----- Require an open shift -----
+    const shift = getCurrentShift(db, req.user.id);
+    if (!shift) {
+        return res.status(403).json({
+            error: "You need an open shift before completing sales. Please open a shift first.",
+        });
+    }
+
     // ----- Validate the request structure -----
     if (!Array.isArray(items) || items.length === 0) {
         return res.status(400).json({
@@ -206,9 +227,9 @@ router.post("/api/sales", requireLogin, (req, res) => {
     const reference = helpers.generateSaleReference();
 
     // ----- Execute the sale as a single atomic transaction -----
-    const insertSale = db.prepare(`
-        INSERT INTO sales (reference, cashier_id, subtotal_cents, vat_cents, total_cents, payment_method)
-        VALUES (?, ?, ?, ?, ?, ?)
+  const insertSale = db.prepare(`
+        INSERT INTO sales (reference, cashier_id, shift_id, subtotal_cents, vat_cents, total_cents, payment_method)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
 
     const insertSaleItem = db.prepare(`
@@ -230,6 +251,7 @@ router.post("/api/sales", requireLogin, (req, res) => {
             const result = insertSale.run(
                 reference,
                 req.user.id,
+                shift.id,
                 subtotalCents,
                 vatCents,
                 totalCents,
@@ -281,6 +303,66 @@ router.post("/api/sales", requireLogin, (req, res) => {
             total:          helpers.formatRand(totalCents),
             payment_method: paymentMethod,
         },
+    });
+});
+
+// =====================================================
+// GET /sales/:id/receipt — printable sales receipt
+// =====================================================
+// Renders a sale as a print-ready receipt. The view
+// uses @media print CSS to hide nav/buttons when
+// printed.
+//
+// Both cashiers and managers can view receipts.
+// =====================================================
+router.get("/sales/:id/receipt", requireLogin, (req, res) => {
+    const saleId = parseInt(req.params.id, 10);
+
+    const sale = db.prepare(`
+        SELECT
+            s.*,
+            u.full_name AS cashier_name,
+            sh.reference AS shift_reference
+        FROM sales s
+        LEFT JOIN users u  ON s.cashier_id = u.id
+        LEFT JOIN shifts sh ON s.shift_id = sh.id
+        WHERE s.id = ?
+    `).get(saleId);
+
+    if (!sale) {
+        return res.status(404).render("error", {
+            title:   "Sale not found",
+            message: `No sale with ID ${saleId}.`,
+        });
+    }
+
+    const items = db.prepare(`
+        SELECT *
+        FROM sale_items
+        WHERE sale_id = ?
+        ORDER BY id ASC
+    `).all(saleId);
+
+    // Also fetch any refunds against this sale so the
+    // receipt can reflect net-refunded items if needed
+    const refunds = db.prepare(`
+        SELECT id, reference, total_cents, created_at
+        FROM refunds
+        WHERE original_sale_id = ?
+        ORDER BY created_at ASC
+    `).all(saleId);
+
+    const shop = require("../data/shop.json");
+
+    res.render("receipt", {
+        title:      `Receipt ${sale.reference}`,
+        active:     "pos",
+        sale:       sale,
+        items:      items,
+        refunds:    refunds,
+        shop:       shop,
+        formatRand: helpers.formatRand,
+        formatDate: helpers.formatDate,
     });
 });
 

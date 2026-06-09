@@ -24,6 +24,7 @@ const {
     formatRand,
     formatDate,
     generateRefundReference,
+    getCurrentShift,
 } = require("../middleware/helpers");
 
 const router = express.Router();
@@ -68,6 +69,11 @@ router.get("/returns", requireLogin, (req, res) => {
 // GET /returns/new — search for original sale
 // =====================================================
 router.get("/returns/new", requireLogin, (req, res) => {
+    const shift = getCurrentShift(db, req.user.id);
+    if (!shift) {
+        req.flash("error", "You need an open shift before processing refunds.");
+        return res.redirect("/shifts/new");
+    }
     const q = req.query.q || "";
 
     // If a search query is provided, look up matching sales
@@ -113,6 +119,11 @@ router.get("/returns/new", requireLogin, (req, res) => {
 //   - quantity available to refund (the remainder)
 // =====================================================
 router.get("/returns/from-sale/:saleId", requireLogin, (req, res) => {
+    const shift = getCurrentShift(db, req.user.id);
+    if (!shift) {
+        req.flash("error", "You need an open shift before processing refunds.");
+        return res.redirect("/shifts/new");
+    }
     const saleId = parseInt(req.params.saleId, 10);
 
     // Look up the original sale
@@ -197,6 +208,12 @@ router.get("/returns/from-sale/:saleId", requireLogin, (req, res) => {
 // =====================================================
 router.post("/returns", requireLogin, (req, res) => {
     const { original_sale_id, reason, note, items: itemsRaw } = req.body;
+    // Require an open shift
+    const shift = getCurrentShift(db, req.user.id);
+    if (!shift) {
+        req.flash("error", "You need an open shift before processing refunds.");
+        return res.redirect("/shifts/new");
+    }
 
     const errors = [];
 
@@ -310,11 +327,11 @@ router.post("/returns", requireLogin, (req, res) => {
     // ----- All atomic. If anything fails, roll back. -----
     const reference = generateRefundReference(db);
 
-    const insertRefund = db.prepare(`
+  const insertRefund = db.prepare(`
         INSERT INTO refunds
-            (reference, original_sale_id, cashier_id, refund_method,
+            (reference, original_sale_id, cashier_id, shift_id, refund_method,
              subtotal_cents, vat_cents, total_cents, reason, note)
-        VALUES (?, ?, ?, 'cash', ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, 'cash', ?, ?, ?, ?, ?)
     `);
 
     const insertItem = db.prepare(`
@@ -339,6 +356,7 @@ router.post("/returns", requireLogin, (req, res) => {
                 reference,
                 saleId,
                 req.user.id,
+                shift.id,
                 subtotalCents,
                 vatCents,
                 totalCents,

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> &middot; Supermarket POS</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <!-- ========== Top bar (hidden when printing) ========== -->
+    <header class="topbar no-print">
+        <div class="topbar-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">▤</span>
+                <span class="brand-name">Supermarket POS</span>
+            </a>
+            <nav class="topnav">
+                <a href="/pos" class="active">Till</a>
+                <a href="/products">Products</a>
+                <a href="/suppliers">Suppliers</a>
+                <a href="/grn">Goods received</a>
+                <a href="/returns">Refunds</a>
+                <a href="/stock-adjustments">Adjustments</a>
+                <a href="/shifts/current">Shifts</a>
+                <a href="/reports/daily">Reports</a>
+                <a href="/users">Users</a>
+            </nav>
+            <div class="topbar-user">
+                <span class="user-name"><%= currentUser.full_name %></span>
+                <span class="user-role"><%= currentUser.role %></span>
+                <a href="/logout" class="logout-link">Sign out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Action bar (hidden when printing) ========== -->
+    <div class="receipt-actions no-print">
+        <a href="/pos" class="btn-secondary">← Back to till</a>
+        <button type="button" onclick="window.print()" class="btn-primary">
+            🖨 Print receipt
+        </button>
+    </div>
+
+    <!-- ========== The receipt itself ========== -->
+    <main class="receipt-page">
+
+        <article class="receipt">
+
+            <!-- ===== Shop header ===== -->
+            <header class="receipt-header">
+                <h1 class="receipt-shop-name"><%= shop.name %></h1>
+                <% if (shop.tagline) { %>
+                    <div class="receipt-tagline"><%= shop.tagline %></div>
+                <% } %>
+                <div class="receipt-shop-meta">
+                    <% shop.address_lines.forEach(line => { %>
+                        <div><%= line %></div>
+                    <% }) %>
+                    <% if (shop.phone) { %>
+                        <div>Tel: <%= shop.phone %></div>
+                    <% } %>
+                    <% if (shop.email) { %>
+                        <div><%= shop.email %></div>
+                    <% } %>
+                    <% if (shop.website) { %>
+                        <div><%= shop.website %></div>
+                    <% } %>
+                    <div class="receipt-vat">VAT No: <%= shop.vat_number %></div>
+                </div>
+            </header>
+
+            <div class="receipt-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+
+            <!-- ===== Transaction details ===== -->
+            <div class="receipt-meta">
+                <div class="receipt-meta-row">
+                    <span>Receipt:</span>
+                    <strong><%= sale.reference %></strong>
+                </div>
+                <div class="receipt-meta-row">
+                    <span>Date:</span>
+                    <span><%= formatDate(sale.created_at) %></span>
+                </div>
+                <div class="receipt-meta-row">
+                    <span>Cashier:</span>
+                    <span><%= sale.cashier_name %></span>
+                </div>
+                <% if (sale.shift_reference) { %>
+                    <div class="receipt-meta-row">
+                        <span>Shift:</span>
+                        <span><%= sale.shift_reference %></span>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="receipt-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+
+            <!-- ===== Items ===== -->
+            <table class="receipt-items">
+                <thead>
+                    <tr>
+                        <th class="receipt-item-name">Item</th>
+                        <th class="receipt-item-qty num">Qty</th>
+                        <th class="receipt-item-price num">Price</th>
+                        <th class="receipt-item-total num">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% items.forEach(item => { %>
+                        <tr>
+                            <td class="receipt-item-name">
+                                <%= item.product_name %>
+                                <div class="receipt-item-sku"><%= item.product_sku %></div>
+                            </td>
+                            <td class="receipt-item-qty num"><%= item.quantity %></td>
+                            <td class="receipt-item-price num"><%= formatRand(item.unit_price_cents) %></td>
+                            <td class="receipt-item-total num"><%= formatRand(item.line_total_cents) %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+
+            <div class="receipt-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+
+            <!-- ===== Totals ===== -->
+            <div class="receipt-totals">
+                <div class="receipt-total-row">
+                    <span>Subtotal (excl VAT):</span>
+                    <span><%= formatRand(sale.subtotal_cents) %></span>
+                </div>
+                <div class="receipt-total-row">
+                    <span>VAT @ 15%:</span>
+                    <span><%= formatRand(sale.vat_cents) %></span>
+                </div>
+                <div class="receipt-total-row receipt-total-grand">
+                    <span>TOTAL:</span>
+                    <span><%= formatRand(sale.total_cents) %></span>
+                </div>
+                <div class="receipt-total-row receipt-total-payment">
+                    <span>Paid by:</span>
+                    <span><%= sale.payment_method.toUpperCase() %></span>
+                </div>
+            </div>
+
+            <!-- ===== Refund notice (if any refunds posted against this sale) ===== -->
+            <% if (refunds.length > 0) { %>
+                <div class="receipt-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                <div class="receipt-refunds">
+                    <strong>Refunds against this sale:</strong>
+                    <% refunds.forEach(r => { %>
+                        <div class="receipt-refund-row">
+                            <%= r.reference %> &middot;
+                            <%= formatDate(r.created_at) %> &middot;
+                            <strong>-<%= formatRand(r.total_cents) %></strong>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+
+            <div class="receipt-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+
+            <!-- ===== Footer ===== -->
+            <footer class="receipt-footer">
+                <% if (shop.footer_thank_you) { %>
+                    <div class="receipt-thank-you"><%= shop.footer_thank_you %></div>
+                <% } %>
+                <% if (shop.footer_returns_policy) { %>
+                    <div class="receipt-returns-policy"><%= shop.footer_returns_policy %></div>
+                <% } %>
+                <% if (shop.registration) { %>
+                    <div class="receipt-registration">Reg: <%= shop.registration %></div>
+                <% } %>
+            </footer>
+
+        </article>
+
+    </main>
+
+    <footer class="sitefoot no-print">
+        <span>Supermarket POS &middot; Phase 3</span>
+        <span>&copy; 2026</span>
+    </footer>
+
+</body>
+</html>
